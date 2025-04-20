@@ -1,53 +1,31 @@
 ﻿import express, { NextFunction, Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
+import { IBook } from '../../core/models/book.model';
+
 
 const booksRouter: Router = express.Router();
 
-interface IRatings {
-    average: number;
-    count: number;
-    rating_1: number;
-    rating_2: number;
-    rating_3: number;
-    rating_4: number;
-    rating_5: number;
-}
-
-interface IUrlIcon {
-    large: string;
-    small: string;
-}
-
-interface IBook {
-    isbn13: number;
-    authors: string;
-    publication: number;
-    original_title: string;
-    title: string;
-    ratings: IRatings;
-    icons: IUrlIcon;
-}
-
 function toBook(row): IBook {
     return {
+        id: row.id,
         isbn13: row.isbn13,
         authors: row.authors,
-        publication: row.original_publication_year,
+        publication: row.publication_year,
         original_title: row.original_title,
         title: row.title,
         ratings: {
-            average: row.average_rating,
-            count: row.ratings_count,
-            rating_1: row.ratings_1,
-            rating_2: row.ratings_2,
-            rating_3: row.ratings_3,
-            rating_4: row.ratings_4,
-            rating_5: row.ratings_5,
+            average: row.rating_avg,
+            count: row.rating_count,
+            rating_1: row.rating_1_star,
+            rating_2: row.rating_2_star,
+            rating_3: row.rating_3_star,
+            rating_4: row.rating_4_star,
+            rating_5: row.rating_5_star,
         },
         icons: {
             large: row.image_url,
-            small: row.small_image_url,
+            small: row.image_small_url,
         },
     };
 }
@@ -88,7 +66,9 @@ booksRouter.get(
         pool.query(theQuery, value)
             .then((result) => {
                 if (result.rows.length === 1) {
+                    console.log('Raw DB row:', JSON.stringify(result.rows[0], null, 2));
                     const book = toBook(result.rows[0]);
+                    console.log('Transformed book:', JSON.stringify(book, null, 2));
                     response.status(200).send({
                         result: book,
                     });
