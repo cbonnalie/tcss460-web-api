@@ -108,3 +108,5 @@ booksRouter.get(
             });
     }
 );
+
+export { booksRouter };
