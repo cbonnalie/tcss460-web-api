@@ -33,21 +33,21 @@ function toBook(row): IBook {
     return {
         isbn13: row.isbn13,
         authors: row.authors,
-        publication: row.publication,
+        publication: row.original_publication_year,
         original_title: row.original_title,
         title: row.title,
         ratings: {
-            average: row.average,
-            count: row.count,
-            rating_1: row.rating_1,
-            rating_2: row.rating_2,
-            rating_3: row.rating_3,
-            rating_4: row.rating_4,
-            rating_5: row.rating_5,
+            average: row.average_rating,
+            count: row.ratings_count,
+            rating_1: row.ratings_1,
+            rating_2: row.ratings_2,
+            rating_3: row.ratings_3,
+            rating_4: row.ratings_4,
+            rating_5: row.ratings_5,
         },
         icons: {
-            large: row.large_icon,
-            small: row.small_icon,
+            large: row.image_url,
+            small: row.small_image_url,
         },
     };
 }
