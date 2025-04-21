@@ -1,13 +1,13 @@
 # TCSS 460 Group 9 - Web API
  
-- [Heroku Hosted API](https://group9-tcss460-web-api-84fb72a7d497.herokuapp.com/)
+- [Heroku-Hosted API](https://group9-tcss460-web-api-84fb72a7d497.herokuapp.com/)
 - [API Documentation](https://cbonnalie.github.io/tcss460-web-api/)
 
 ## Alpha Sprint
 
 ### Contribution
 * Christian
-    - Set up / configured hosting for API and documentation
+    - Set up / configured hosting for API, Postgres DB, and documentation
     - Implemented routes to get books by title and ISBN
 * Kaleb
 * Mark
