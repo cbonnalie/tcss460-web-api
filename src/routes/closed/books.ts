@@ -99,7 +99,7 @@ booksRouter.get(
         const theQuery = `
             SELECT *
             FROM books
-            WHERE title CONTAINS $1
+            WHERE title LIKE %$1%
         `;
         const value = [request.params.title];
 
