@@ -99,9 +99,9 @@ booksRouter.get(
         const theQuery = `
             SELECT *
             FROM books
-            WHERE title LIKE %$1%
+            WHERE title ILIKE $1
         `;
-        const value = [request.params.title];
+        const value = [`%${request.params.title}%`];
 
         pool.query(theQuery, value)
             .then((result) => {
