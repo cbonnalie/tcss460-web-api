@@ -13,7 +13,8 @@
         "test": "echo \"Error: no test specified\" && exit 1",
         "format:check": "prettier --check .",
         "format:write": "prettier --write .",
-        "deploy": "git add . && git commit -m Heroku && git push heroku master"
+        "deploy": "git add . && git commit -m Heroku && git push heroku master",
+        "doc":  "apidoc -i src -o docs"
     },
     "keywords": [],
     "author": "Charles Bryan",

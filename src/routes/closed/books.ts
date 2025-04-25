@@ -165,57 +165,57 @@ booksRouter.get(
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
 booksRouter.get(
-    '/isbns/:isbn',
+    '/isbns/',
     (request: Request, response: Response, next: NextFunction) => {
-        if (request.params.isbn === null || request.params.isbn === undefined) {
-            response.status(400).send({
-                message:
-                    'No query parameter in url - please refer to documentation',
-            });
-        } else if (!validationFunctions.isNumberProvided(request.params.isbn)) {
-            response.status(400).send({
-                message:
-                    'Query parameter not of required type - please refer to documentation',
-            });
-        } else if (
-            Number(request.params.isbn) < 0 ||
-            Number(request.params.isbn) > Math.pow(10, 13)
-        ) {
-            response.status(400).send({
-                message: 'ISBN not in range - please refer to documentation',
-            });
-        }
-        next();
-    },
-    (request: IJwtRequest, response: Response) => {
-        const theQuery = `
-            SELECT *
-            FROM BOOKS
-            WHERE isbn13 = $1
-        `;
-        const value = [request.params.isbn];
-
-        pool.query(theQuery, value)
-            .then((result) => {
-                if (result.rows.length === 1) {
-                    const book = toBook(result.rows[0]);
-                    response.status(200).send({
-                        result: book,
-                    });
-                } else {
-                    response.status(404).send({
-                        message: 'Book not found for ISBN ',
-                        value,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('DB Query error on GET by ISBN');
-                console.error(error);
-                response.status(500).send({
-                    message: 'server error - contact support',
+        try {
+            const isbn = request.query.isbn;
+            if (isbn === null || isbn === undefined) {
+                return response.status(400).send({
+                    message: 'No query parameter in url - please refer to documentation',
                 });
-            });
+            }
+
+            if (!validationFunctions.isNumberProvided(isbn)) {
+                return response.status(400).send({
+                    message: 'Query parameter not of required type - please refer to documentation',
+                });
+            }
+
+            const isbnNumber = Number(isbn);
+            if (isbnNumber < 0 || isbnNumber > Math.pow(10, 13)) {
+                return response.status(400).send({
+                    message: 'ISBN not in range - please refer to documentation',
+                });
+            }
+
+            next();
+        } catch (err) {
+            next(err);
+        }
+    },
+    async (request: IJwtRequest, response: Response) => {
+        try {
+            const theQuery = `
+                SELECT *
+                FROM BOOKS
+                WHERE isbn13 = $1
+            `;
+            const value = [request.query.isbn];
+
+            const result = await pool.query(theQuery, value);
+
+            if (result.rows.length === 1) {
+                const book = toBook(result.rows[0]);
+                return response.status(200).send({ result: book });
+            } else {
+                return response.status(404).send({
+                    isbn: value,
+                    message: 'Book not found for ISBN ' + value
+                });
+            }
+        } catch (error) {
+            console.error('DB Query error on GET by ISBN', error);
+        }
     }
 );
 
