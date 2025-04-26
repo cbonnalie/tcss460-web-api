@@ -182,7 +182,7 @@ booksRouter.get(
             }
 
             const isbnNumber = Number(isbn);
-            if (isbnNumber < 0 || isbnNumber > Math.pow(10, 13)) {
+            if (String(isbnNumber).length != 13) {
                 return response.status(400).send({
                     message: 'ISBN not in range - please refer to documentation',
                 });
