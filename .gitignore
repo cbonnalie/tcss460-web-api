@@ -33,3 +33,5 @@ package-lock.json
 # System files
 .DS_Store
 Thumbs.db
+env.development
+dev.env
