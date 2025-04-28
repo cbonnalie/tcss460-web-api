@@ -11,8 +11,8 @@
     - Set up / configured hosting for API, Postgres DB, and documentation
     - Implemented routes to get books by title and ISBN
 - Kaleb
-    - Set up heroku account.
-    - Tested message routes in postman.
+    - Cleaned books.csv data
+    - Created heroku database
 - Mark
     - set up heroku account, tested /message routes
     - worked on README
