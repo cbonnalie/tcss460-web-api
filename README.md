@@ -24,3 +24,17 @@ All meetings in the alpha sprint were held remotely. Asynchronous communication 
 throughout the week when needed.
 
 ### Comments
+
+## Beta Sprint
+
+### Contribution
+
+- Christian
+    - Created route, documentation, and testing for getting book by ISBN.
+
+### Meetings
+
+All meetings in the alpha sprint were held remotely. Asynchronous communication was held
+throughout the week when needed.
+
+### Comments
