@@ -219,4 +219,91 @@ booksRouter.get(
     }
 );
 
+/**
+ * @api {get} /books/author/:author Request to retrieve books by author
+ *
+ * @apiDescription Request to retrieve books from the DB that contain the specified <code>author</code>
+ *
+ * @apiName GetBooksByAuthor
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {string} author The author name to search for (partial match, case-insensitive)
+ *
+ * @apiSuccess {Object[]} books The array of book objects by the specified author
+ * @apiSuccess {number} books.id The ID of the book
+ * @apiSuccess {number} books.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} books.authors The authors of the book
+ * @apiSuccess {string} books.publication The publication year of the book
+ * @apiSuccess {string} books.original_title The original title of the book
+ * @apiSuccess {string} books.title The title of the book
+ * @apiSuccess {Object} books.ratings The ratings of the book
+ * @apiSuccess {number} books.ratings.average The average rating
+ * @apiSuccess {number} books.ratings.count Total rating count
+ * @apiSuccess {number} books.ratings.rating_1 1-star ratings
+ * @apiSuccess {number} books.ratings.rating_2 2-star ratings
+ * @apiSuccess {number} books.ratings.rating_3 3-star ratings
+ * @apiSuccess {number} books.ratings.rating_4 4-star ratings
+ * @apiSuccess {number} books.ratings.rating_5 5-star ratings
+ * @apiSuccess {Object} books.icons Book cover URLs
+ * @apiSuccess {string} books.icons.large Large cover URL
+ * @apiSuccess {string} books.icons.small Small cover URL
+ *
+ * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (404: No books found) {String} message "No books found by author [author]"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.get(
+    '/author/:author',
+    (request: Request, response: Response, next: NextFunction) => {
+        if (
+            request.params.author === null ||
+            request.params.author === undefined
+        ) {
+            response.status(400).send({
+                message: 'No query parameter in url - please refer to documentation',
+            });
+        } else if (
+            !validationFunctions.isStringProvided(request.params.author)
+        ) {
+            response.status(400).send({
+                message: 'Query parameter not of required type - please refer to documentation',
+            });
+        }
+        next();
+    },
+    (request: IJwtRequest, response: Response) => {
+        const theQuery = `
+            SELECT *
+            FROM books
+            WHERE authors ILIKE $1
+        `;
+        const value = [`%${request.params.author}%`];
+
+        pool.query(theQuery, value)
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    const books: IBook[] = toBooks(result.rows);
+                    response.status(200).send({
+                        books: books,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: `No books found by author ${request.params.author}`,
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('DB Query error on GET by Author');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
+    }
+);
+
 export { booksRouter };
+    

@@ -1,0 +1,310 @@
+{
+	"info": {
+		"_postman_id": "fba210e1-cbcd-4875-8d7d-f0cdca6b739f",
+		"name": "Books",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44130128",
+		"_collection_link": "https://markkulibaba.postman.co/workspace/83877fce-8580-4a2c-8b02-f53fc2cbff23/collection/44130128-fba210e1-cbcd-4875-8d7d-f0cdca6b739f?action=share&source=collection_link&creator=44130128"
+	},
+	"item": [
+		{
+			"name": "200 Valid",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Basic status test\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Response should have a books array\r",
+							"pm.test(\"Response has books array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('books');\r",
+							"    pm.expect(jsonData.books).to.be.an('array');\r",
+							"    pm.expect(jsonData.books.length).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// The first book's author should include \"Stephen King\" (case-insensitive)\r",
+							"pm.test(\"First book author is Stephen King\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.books[0].authors.toLowerCase()).to.include(\"stephen king\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/author/Stephen King",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"author",
+						"Stephen King"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 Valid/Lowercase",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Basic status test\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Response should have a books array\r",
+							"pm.test(\"Response has books array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('books');\r",
+							"    pm.expect(jsonData.books).to.be.an('array');\r",
+							"    pm.expect(jsonData.books.length).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// The first book's author should include \"Stephen King\" (case-insensitive)\r",
+							"pm.test(\"First book author is Stephen King\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.books[0].authors.toLowerCase()).to.include(\"stephen king\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/books/author/stephen king",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"author",
+						"stephen king"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 Valid/Uppercase",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Basic status test\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"// Response should have a books array\r",
+							"pm.test(\"Response has books array\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('books');\r",
+							"    pm.expect(jsonData.books).to.be.an('array');\r",
+							"    pm.expect(jsonData.books.length).to.be.above(0);\r",
+							"});\r",
+							"\r",
+							"// The first book's author should include \"Stephen King\" (case-insensitive)\r",
+							"pm.test(\"First book author is Stephen King\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.books[0].authors.toLowerCase()).to.include(\"stephen king\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/books/author/STEPHEN KING",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"author",
+						"STEPHEN KING"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "404 Author Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Status code should be 404\r",
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Error message returned\", function () {\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData).to.have.property('message');\r",
+							"    // Accepts either \"no books found\" or \"not found\" for broader compatibility\r",
+							"    pm.expect(jsonData.message.toLowerCase()).to.satisfy(msg =>\r",
+							"        msg.includes(\"not found\") || msg.includes(\"no books found\")\r",
+							"    );\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/books/author/NULL",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"author",
+						"NULL"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Missing Author Param",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"// Should be 404 or 400 depending on your API's response\r",
+							"pm.test(\"Status code is 404 or 400\", function () {\r",
+							"    pm.expect([404, 400]).to.include(pm.response.code);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Missing parameter error message\", function () {\r",
+							"    pm.expect(pm.response.text().toLowerCase()).to.include(\"cannot get /books/author\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{BASE_URL}}/books/author/",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"author",
+						""
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "ACCESS_TOKEN",
+			"value": "",
+			"type": "default"
+		},
+		{
+			"key": "BASE_URL",
+			"value": "https://localhost:4000",
+			"type": "default"
+		}
+	]
+}
