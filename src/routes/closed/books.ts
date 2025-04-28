@@ -349,20 +349,6 @@ booksRouter.get(
  *
  * @apiUse JWT
  *
- * @apiParam {number} book_id The ID of the book
- * @apiParam {number} isbn13 The ISBN-13 of the book
- * @apiParam {string} authors The authors of the book
- * @apiParam {number} original_publication_year The original publication year of the book
- * @apiParam {string} original_title The original title of the book
- * @apiParam {string} title The title of the book
- * @apiParam {number} ratings_1 The number of 1-star ratings
- * @apiParam {number} ratings_2 The number of 2-star ratings
- * @apiParam {number} ratings_3 The number of 3-star ratings
- * @apiParam {number} ratings_4 The number of 4-star ratings
- * @apiParam {number} ratings_5 The number of 5-star ratings
- * @apiParam {string} image_url The URL of the large icon
- * @apiParam {string} small_image_url The URL of the small icon
- *
  * @apiSuccess {Object} result The book object
  * @apiSuccess {number} result.id The ID of the book
  * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
