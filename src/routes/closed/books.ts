@@ -2,70 +2,9 @@
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
 import { IBook } from '../../core/models/book.model';
+import { bookFunctions } from '../../core/utilities/bookFunctions';
 
 const booksRouter: Router = express.Router();
-
-function getAverage(
-    rating_1: number,
-    rating_2: number,
-    rating_3: number,
-    rating_4: number,
-    rating_5: number
-): number {
-    const totalRatings =
-        rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
-    const totalWeightedRatings =
-        rating_1 + 2 * rating_2 + 3 * rating_3 + 4 * rating_4 + 5 * rating_5;
-    return totalWeightedRatings / totalRatings;
-}
-
-function getRatingCount(
-    rating_1: number,
-    rating_2: number,
-    rating_3: number,
-    rating_4: number,
-    rating_5: number
-): number {
-    return (
-        rating_1 +
-        rating_2 +
-        rating_3 +
-        rating_4 +
-        rating_5
-    );
-}
-
-function toBook(row): IBook {
-
-    const average = getAverage(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
-    const count = getRatingCount(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
-
-    return {
-        id: row.id,
-        isbn13: row.isbn13,
-        authors: row.authors,
-        publication: row.publication_year,
-        original_title: row.original_title,
-        title: row.title,
-        ratings: {
-            average: average,
-            count: count,
-            rating_1: row.rating_1_star,
-            rating_2: row.rating_2_star,
-            rating_3: row.rating_3_star,
-            rating_4: row.rating_4_star,
-            rating_5: row.rating_5_star,
-        },
-        icons: {
-            large: row.image_url,
-            small: row.image_small_url,
-        },
-    };
-}
-
-function toBooks(rows): IBook[] {
-    return rows.map(toBook);
-}
 
 /**
  * @apiDefine JWT
@@ -140,7 +79,7 @@ booksRouter.get(
         pool.query(theQuery, value)
             .then((result) => {
                 if (result.rows.length > 0) {
-                    const books: IBook[] = toBooks(result.rows);
+                    const books: IBook[] = bookFunctions.toBooks(result.rows);
                     response.status(200).send({
                         books: books,
                     });
@@ -205,20 +144,23 @@ booksRouter.get(
             const isbn = request.query.isbn;
             if (isbn === null || isbn === undefined) {
                 return response.status(400).send({
-                    message: 'No query parameter in url - please refer to documentation',
+                    message:
+                        'No query parameter in url - please refer to documentation',
                 });
             }
 
             if (!validationFunctions.isNumberProvided(isbn)) {
                 return response.status(400).send({
-                    message: 'Query parameter not of required type - please refer to documentation',
+                    message:
+                        'Query parameter not of required type - please refer to documentation',
                 });
             }
 
             const isbnNumber = Number(isbn);
             if (String(isbnNumber).length != 13) {
                 return response.status(400).send({
-                    message: 'ISBN not in range - please refer to documentation',
+                    message:
+                        'ISBN not in range - please refer to documentation',
                 });
             }
 
@@ -239,12 +181,12 @@ booksRouter.get(
             const result = await pool.query(theQuery, value);
 
             if (result.rows.length === 1) {
-                const book = toBook(result.rows[0]);
+                const book = bookFunctions.toBook(result.rows[0]);
                 return response.status(200).send({ result: book });
             } else {
                 return response.status(404).send({
                     isbn: value,
-                    message: 'Book not found for ISBN ' + value
+                    message: 'Book not found for ISBN ' + value,
                 });
             }
         } catch (error) {
@@ -297,13 +239,15 @@ booksRouter.get(
             request.params.author === undefined
         ) {
             response.status(400).send({
-                message: 'No query parameter in url - please refer to documentation',
+                message:
+                    'No query parameter in url - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.params.author)
         ) {
             response.status(400).send({
-                message: 'Query parameter not of required type - please refer to documentation',
+                message:
+                    'Query parameter not of required type - please refer to documentation',
             });
         }
         next();
@@ -319,7 +263,7 @@ booksRouter.get(
         pool.query(theQuery, value)
             .then((result) => {
                 if (result.rows.length > 0) {
-                    const books: IBook[] = toBooks(result.rows);
+                    const books: IBook[] = bookFunctions.toBooks(result.rows);
                     response.status(200).send({
                         books: books,
                     });
@@ -379,8 +323,7 @@ booksRouter.post(
             request.body.book_id === undefined
         ) {
             response.status(400).send({
-                message:
-                    'book id not provided - please refer to documentation',
+                message: 'book id not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.book_id)
@@ -397,8 +340,7 @@ booksRouter.post(
     (request: Request, response: Response, next: NextFunction) => {
         if (request.body.isbn13 === null || request.body.isbn13 === undefined) {
             response.status(400).send({
-                message:
-                    'ISBN not provided - please refer to documentation',
+                message: 'ISBN not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isNumberProvided(request.body.isbn13)) {
             response.status(400).send({
@@ -416,8 +358,7 @@ booksRouter.post(
             request.body.authors === undefined
         ) {
             response.status(400).send({
-                message:
-                    'Author not provided - please refer to documentation',
+                message: 'Author not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.authors)
@@ -478,8 +419,7 @@ booksRouter.post(
     (request: Request, response: Response, next: NextFunction) => {
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
-                message:
-                    'Title not provided - please refer to documentation',
+                message: 'Title not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isStringProvided(request.body.title)) {
             response.status(400).send({
@@ -640,7 +580,8 @@ booksRouter.post(
     (request: IJwtRequest, response: Response) => {
         const theQuery = `
             INSERT INTO books (id, isbn13, authors, publication_year, original_title, title,
-                               rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
+                               rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url,
+                               image_small_url)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         `;
         const values = [
@@ -676,4 +617,3 @@ booksRouter.post(
 );
 
 export { booksRouter };
-    
