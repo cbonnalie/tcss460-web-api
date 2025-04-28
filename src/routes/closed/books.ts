@@ -703,5 +703,37 @@ booksRouter.post(
     }
 );
 
+booksRouter.get(
+    '/all',
+    (request: Request, response: Response) => {
+        const theQuery = `
+            SELECT *
+            FROM books
+        `;
+
+        pool.query(theQuery)
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    const books: IBook[] = toBooks(result.rows);
+                    response.status(200).send({
+                        books: books,
+                    });
+                } else {
+                    response.status(404).send({
+                        message: 'No books found',
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('DB Query error on GET all books');
+                console.error(error);
+                response.status(500).send({
+                    message: 'server error - contact support',
+                });
+            });
+    }
+
+)
+
 export { booksRouter };
     
