@@ -14,6 +14,8 @@
     - Set up heroku account.
     - Tested message routes in postman.
 - Mark
+    - set up heroku account, tested /message routes
+    - worked on README
 - Noah
 
 ### Meetings
