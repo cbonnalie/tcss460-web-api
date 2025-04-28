@@ -5,7 +5,41 @@ import { IBook } from '../../core/models/book.model';
 
 const booksRouter: Router = express.Router();
 
+function getAverage(
+    rating_1: number,
+    rating_2: number,
+    rating_3: number,
+    rating_4: number,
+    rating_5: number
+): number {
+    const totalRatings =
+        rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
+    const totalWeightedRatings =
+        rating_1 + 2 * rating_2 + 3 * rating_3 + 4 * rating_4 + 5 * rating_5;
+    return totalWeightedRatings / totalRatings;
+}
+
+function getRatingCount(
+    rating_1: number,
+    rating_2: number,
+    rating_3: number,
+    rating_4: number,
+    rating_5: number
+): number {
+    return (
+        rating_1 +
+        rating_2 +
+        rating_3 +
+        rating_4 +
+        rating_5
+    );
+}
+
 function toBook(row): IBook {
+
+    const average = getAverage(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
+    const count = getRatingCount(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
+
     return {
         id: row.id,
         isbn13: row.isbn13,
@@ -14,8 +48,8 @@ function toBook(row): IBook {
         original_title: row.original_title,
         title: row.title,
         ratings: {
-            average: row.rating_avg,
-            count: row.rating_count,
+            average: average,
+            count: count,
             rating_1: row.rating_1_star,
             rating_2: row.rating_2_star,
             rating_3: row.rating_3_star,
@@ -321,8 +355,6 @@ booksRouter.get(
  * @apiParam {number} original_publication_year The original publication year of the book
  * @apiParam {string} original_title The original title of the book
  * @apiParam {string} title The title of the book
- * @apiParam {number} average_rating The average rating of the book
- * @apiParam {number} ratings_count The number of ratings for the book
  * @apiParam {number} ratings_1 The number of 1-star ratings
  * @apiParam {number} ratings_2 The number of 2-star ratings
  * @apiParam {number} ratings_3 The number of 3-star ratings
@@ -339,8 +371,6 @@ booksRouter.get(
  * @apiSuccess {string} result.original_title The original title of the book
  * @apiSuccess {string} result.title The title of the book
  * @apiSuccess {Object} result.ratings The ratings of the book
- * @apiSuccess {number} result.ratings.average The average rating of the book
- * @apiSuccess {number} result.ratings.count The number of ratings for the book
  * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
  * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
  * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
@@ -364,7 +394,7 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'book id not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.book_id)
@@ -382,12 +412,12 @@ booksRouter.post(
         if (request.body.isbn13 === null || request.body.isbn13 === undefined) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'ISBN not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isNumberProvided(request.body.isbn13)) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'ISBN must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -401,14 +431,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Author not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.authors)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Author must be a string - please refer to documentation',
             });
         } else {
             next();
@@ -422,7 +452,7 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Publication year not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(
@@ -431,7 +461,7 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Publication year must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -445,14 +475,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Original title not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.original_title)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Original title must be a string - please refer to documentation',
             });
         } else {
             next();
@@ -463,54 +493,12 @@ booksRouter.post(
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Title not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isStringProvided(request.body.title)) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
-            });
-        } else {
-            next();
-        }
-    },
-    // Average Rating
-    (request: Request, response: Response, next: NextFunction) => {
-        if (
-            request.body.average_rating === null ||
-            request.body.average_rating === undefined
-        ) {
-            response.status(400).send({
-                message:
-                    'No query parameter in url - please refer to documentation',
-            });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.average_rating)
-        ) {
-            response.status(400).send({
-                message:
-                    'book_id must be a number - please refer to documentation',
-            });
-        } else {
-            next();
-        }
-    },
-    // Ratings Count
-    (request: Request, response: Response, next: NextFunction) => {
-        if (
-            request.body.ratings_count === null ||
-            request.body.ratings_count === undefined
-        ) {
-            response.status(400).send({
-                message:
-                    'No query parameter in url - please refer to documentation',
-            });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_count)
-        ) {
-            response.status(400).send({
-                message:
-                    'book_id must be a number - please refer to documentation',
+                    'Title must be a string - please refer to documentation',
             });
         } else {
             next();
@@ -524,14 +512,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Ratings 1 not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.ratings_1)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Ratings 1 must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -545,14 +533,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Ratings 2 not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.ratings_2)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Ratings 2 must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -566,14 +554,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Ratings 3 not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.ratings_3)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Ratings 3 must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -587,14 +575,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Ratings 4 not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.ratings_4)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Ratings 4 must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -608,14 +596,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Ratings 5 not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.ratings_5)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Ratings 5 must be a number - please refer to documentation',
             });
         } else {
             next();
@@ -629,14 +617,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Image URL not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.image_url)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Wrong type for image URL - please refer to documentation',
             });
         } else {
             next();
@@ -650,14 +638,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'No query parameter in url - please refer to documentation',
+                    'Small image URL not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.small_image_url)
         ) {
             response.status(400).send({
                 message:
-                    'book_id must be a number - please refer to documentation',
+                    'Wrong type for small image URL - please refer to documentation',
             });
         } else {
             next();
@@ -665,9 +653,9 @@ booksRouter.post(
     },
     (request: IJwtRequest, response: Response) => {
         const theQuery = `
-            INSERT INTO books (id, isbn13, authors, publication_year, original_title, title, rating_avg, rating_count,
+            INSERT INTO books (id, isbn13, authors, publication_year, original_title, title,
                                rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
         `;
         const values = [
             request.body.book_id,
@@ -676,8 +664,6 @@ booksRouter.post(
             request.body.publication_year,
             request.body.original_title,
             request.body.title,
-            request.body.rating_avg,
-            request.body.rating_count,
             request.body.rating_1_star,
             request.body.rating_2_star,
             request.body.rating_3_star,
@@ -702,38 +688,6 @@ booksRouter.post(
             });
     }
 );
-
-booksRouter.get(
-    '/all',
-    (request: Request, response: Response) => {
-        const theQuery = `
-            SELECT *
-            FROM books
-        `;
-
-        pool.query(theQuery)
-            .then((result) => {
-                if (result.rows.length > 0) {
-                    const books: IBook[] = toBooks(result.rows);
-                    response.status(200).send({
-                        books: books,
-                    });
-                } else {
-                    response.status(404).send({
-                        message: 'No books found',
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('DB Query error on GET all books');
-                console.error(error);
-                response.status(500).send({
-                    message: 'server error - contact support',
-                });
-            });
-    }
-
-)
 
 export { booksRouter };
     
