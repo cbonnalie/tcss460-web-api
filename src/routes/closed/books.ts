@@ -269,29 +269,9 @@ booksRouter.get(
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
 booksRouter.post(
-    '/books',
+    '/',
+    // Book ID
     (request: Request, response: Response, next: NextFunction) => {
-        /**
-         * book_id,
-         * isbn13,
-         * authors,
-         * original_publication_year,
-         * original_title,
-         * title,
-         * average_rating,
-         * ratings_count,
-         * ratings_1,
-         * ratings_2,
-         * ratings_3,
-         * ratings_4,
-         * ratings_5,
-         * image_url,
-         * small_image_url
-         *
-         * The books.csv seems like that all columns are required, so we will check all of them.
-         */
-
-        // Book ID
         if (
             request.body.book_id === null ||
             request.body.book_id === undefined
@@ -305,11 +285,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // ISBN-13
+    },
+    // ISBN-13
+    (request: Request, response: Response, next: NextFunction) => {
         if (request.body.isbn13 === null || request.body.isbn13 === undefined) {
             response.status(400).send({
                 message:
@@ -318,11 +301,14 @@ booksRouter.post(
         } else if (!validationFunctions.isNumberProvided(request.body.isbn13)) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Authors
+    },
+    // Authors
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.authors === null ||
             request.body.authors === undefined
@@ -336,11 +322,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Original Publication Year
+    },
+    // Original Publication Year
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.original_publication_year === null ||
             request.body.original_publication_year === undefined
@@ -356,11 +345,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Original Title
+    },
+    // Original Title
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.original_title === null ||
             request.body.original_title === undefined
@@ -374,11 +366,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Title
+    },
+    // Title
+    (request: Request, response: Response, next: NextFunction) => {
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
                 message:
@@ -387,11 +382,14 @@ booksRouter.post(
         } else if (!validationFunctions.isStringProvided(request.body.title)) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Average Rating
+    },
+    // Average Rating
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.average_rating === null ||
             request.body.average_rating === undefined
@@ -405,11 +403,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings Count
+    },
+    // Ratings Count
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_count === null ||
             request.body.ratings_count === undefined
@@ -423,11 +424,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings 1
+    },
+    // Ratings 1
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_1 === null ||
             request.body.ratings_1 === undefined
@@ -437,15 +441,18 @@ booksRouter.post(
                     'No query parameter in url - please refer to documentation',
             });
         } else if (
-            !validationFunctions.isNumberProvided(request.body.rating_1)
+            !validationFunctions.isNumberProvided(request.body.ratings_1)
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings 2
+    },
+    // Ratings 2
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_2 === null ||
             request.body.ratings_2 === undefined
@@ -455,15 +462,18 @@ booksRouter.post(
                     'No query parameter in url - please refer to documentation',
             });
         } else if (
-            !validationFunctions.isNumberProvided(request.body.rating_2)
+            !validationFunctions.isNumberProvided(request.body.ratings_2)
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings 3
+    },
+    // Ratings 3
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_3 === null ||
             request.body.ratings_3 === undefined
@@ -473,15 +483,18 @@ booksRouter.post(
                     'No query parameter in url - please refer to documentation',
             });
         } else if (
-            !validationFunctions.isNumberProvided(request.body.rating_3)
+            !validationFunctions.isNumberProvided(request.body.ratings_3)
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings 4
+    },
+    // Ratings 4
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_4 === null ||
             request.body.ratings_4 === undefined
@@ -491,15 +504,18 @@ booksRouter.post(
                     'No query parameter in url - please refer to documentation',
             });
         } else if (
-            !validationFunctions.isNumberProvided(request.body.rating_4)
+            !validationFunctions.isNumberProvided(request.body.ratings_4)
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Ratings 5
+    },
+    // Ratings 5
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.ratings_5 === null ||
             request.body.ratings_5 === undefined
@@ -509,15 +525,18 @@ booksRouter.post(
                     'No query parameter in url - please refer to documentation',
             });
         } else if (
-            !validationFunctions.isNumberProvided(request.body.rating_5)
+            !validationFunctions.isNumberProvided(request.body.ratings_5)
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Image URL
+    },
+    // Image URL
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.image_url === null ||
             request.body.image_url === undefined
@@ -531,11 +550,14 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-
-        // Small Image URL
+    },
+    // Small Image URL
+    (request: Request, response: Response, next: NextFunction) => {
         if (
             request.body.small_image_url === null ||
             request.body.small_image_url === undefined
@@ -549,18 +571,20 @@ booksRouter.post(
         ) {
             response.status(400).send({
                 message:
-                    'Query parameter not of required type - please refer to documentation',
+                    'book_id must be a number - please refer to documentation',
             });
+        } else {
+            next();
         }
-        next();
     },
     (request: IJwtRequest, response: Response) => {
         const theQuery = `
-            INSERT INTO books (book_id, isbn13, authors, publication_year, original_title, title, rating_avg, rating_count,
-                               rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, small_image_url)
+            INSERT INTO books (id, isbn13, authors, publication_year, original_title, title, rating_avg, rating_count,
+                               rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url, image_small_url)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15);
         `;
         const values = [
+            request.body.book_id,
             request.body.isbn13,
             request.body.authors,
             request.body.publication_year,
