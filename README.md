@@ -34,6 +34,10 @@ throughout the week when needed.
 - Kaleb
     - Cleaned books.csv data
     - Created heroku database
+- Mark
+    - Created route, documentation, and testing for getting books by author.
+- Noah
+    - Created route, documentation, and testing for creating a book.
 
 ### Meetings
 
