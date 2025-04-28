@@ -1,0 +1,474 @@
+{
+	"info": {
+		"_postman_id": "d3de41e9-5419-4417-a509-68073c21061b",
+		"name": "GET-ISBN-Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38541945",
+		"_collection_link": "https://tcss460-group-9.postman.co/workspace/Messages~2e6ff5c7-e4ec-43f4-a3fc-0a182c39f97e/collection/38541945-d3de41e9-5419-4417-a509-68073c21061b?action=share&source=collection_link&creator=38541945"
+	},
+	"item": [
+		{
+			"name": "GET ISBN - 200",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();\r",
+							"\r",
+							"pm.test(\"Response status should be 200\", () => \r",
+							"    pm.response.to.have.status(200)\r",
+							");\r",
+							"\r",
+							"pm.test(\"Response body should have result field\", () => {\r",
+							"    pm.expect(responseBody).to.haveOwnProperty(\"result\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Result should have all book fields\", () => {\r",
+							"    const result = responseBody.result;\r",
+							"\r",
+							"    pm.expect(result).to.haveOwnProperty(\"id\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"isbn13\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"authors\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"publication\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"original_title\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"title\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"ratings\");\r",
+							"    pm.expect(result).to.haveOwnProperty(\"icons\");\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Result should have correct data types\", () => {\r",
+							"    const result = responseBody.result;\r",
+							"\r",
+							"    pm.expect(result.id).to.be.a(\"number\");\r",
+							"    pm.expect(result.isbn13).to.be.a(\"string\");\r",
+							"    pm.expect(result.authors).to.be.a(\"string\");\r",
+							"    pm.expect(result.publication).to.be.a(\"number\");\r",
+							"    pm.expect(result.original_title).to.be.a(\"string\");\r",
+							"    pm.expect(result.title).to.be.a(\"string\");\r",
+							"    pm.expect(result.ratings).to.be.an(\"object\");\r",
+							"    pm.expect(result.icons).to.be.an(\"object\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Title should contain 'The Hunger Games'\", () => {\r",
+							"    pm.expect(responseBody.result.title).to.include(\"The Hunger Games\");\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Author should be Suzanne Collins\", () => {\r",
+							"    pm.expect(responseBody.result.authors).to.eql(\"Suzanne Collins\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns?isbn=9780439023480",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					],
+					"query": [
+						{
+							"key": "isbn",
+							"value": "9780439023480"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ISBN - Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();\r",
+							"const message = responseBody.message;\r",
+							"const isbn = responseBody.isbn[0];\r",
+							"\r",
+							"pm.test(\"Response status should be 404\", () => {\r",
+							"    pm.response.to.have.status(404);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Response body should have message field\", () => {\r",
+							"    pm.expect(responseBody).to.haveOwnProperty(\"message\");\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Message should have form \\\"Book not found for ISBN {isbn}\\\"\", () => {\r",
+							"    pm.expect(responseBody.message).to.equal(\"Book not found for ISBN \" + isbn);\r",
+							"});\r",
+							"\r",
+							""
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns?isbn=9780439023481",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					],
+					"query": [
+						{
+							"key": "isbn",
+							"value": "9780439023481"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ISBN - No Query Parameter",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();\r",
+							"const queryParams = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+							"\r",
+							"pm.test(\"Response status should be 400\", () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"URL should have no query parameter\", () => {\r",
+							"    pm.expect(queryParams.length === 0);\r",
+							"})\r",
+							"\r",
+							"pm.test\r",
+							"\r",
+							"pm.test(\"Message should have form \\\"No query parameter in url - please refer to documentation\\\"\", () => {\r",
+							"    pm.expect(responseBody.message).to.equal(\"No query parameter in url - please refer to documentation\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const queryParams = pm.request.url.query;\r",
+							"pm.collectionVariables.set('body', JSON.stringify({queryParams}));"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ISBN - Wrong Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const responseBody = pm.response.json();\r",
+							"const queryParams = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+							"\r",
+							"pm.test(\"Response status should be 400\", () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"ISBN should not be of type number\", () => {\r",
+							"    pm.expect(typeof queryParams.isbn !== 'number');\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Response body should have message field\", () => {\r",
+							"    pm.expect(responseBody).to.haveOwnProperty(\"message\");\r",
+							"})\r",
+							"\r",
+							"pm.test(\"Message should have form \\\"Query parameter not of required type - please refer to documentation\\\"\", () => {\r",
+							"    pm.expect(responseBody.message).to.equal(\"Query parameter not of required type - please refer to documentation\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns?isbn=abcdefg",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					],
+					"query": [
+						{
+							"key": "isbn",
+							"value": "abcdefg"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ISBN - Not In Range (Greater)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const isbn = pm.request.url.query.find(q => q.key === 'isbn');\r",
+							"if (isbn) {\r",
+							"    pm.variables.set('isbn', isbn.value);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const isbn = pm.variables.get('isbn')\r",
+							"\r",
+							"pm.test(\"Response status should be 400\", () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"ISBN should be more than 13 digits\", () => {\r",
+							"    pm.expect(String(isbn).length > 13);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns?isbn=2138945678237895645912",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					],
+					"query": [
+						{
+							"key": "isbn",
+							"value": "2138945678237895645912"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "GET ISBN - Not In Range (Lesser)",
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"exec": [
+							"const isbn = pm.request.url.query.find(q => q.key === 'isbn');\r",
+							"if (isbn) {\r",
+							"    pm.variables.set('isbn', isbn.value);\r",
+							"}"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const isbn = pm.variables.get('isbn')\r",
+							"\r",
+							"pm.test(\"Response status should be 400\", () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"})\r",
+							"\r",
+							"pm.test(\"ISBN should have less than 13 digits\", () => {\r",
+							"    pm.expect(String(isbn).length < 13);\r",
+							"})"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/isbns?isbn=-5",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"isbns"
+					],
+					"query": [
+						{
+							"key": "isbn",
+							"value": "-5"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{ACCESS_TOKEN}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "body",
+			"value": ""
+		}
+	]
+}

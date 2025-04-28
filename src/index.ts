@@ -1,4 +1,4 @@
-import express, { Express, Request, Response } from 'express';
+import express, { Express, NextFunction, Request, Response } from 'express';
 
 import cors from 'cors';
 
@@ -23,4 +23,11 @@ app.get('/', (request: Request, response: Response) => {
 
 app.listen(PORT, () => {
     return console.log(`Express is listening at http://localhost:${PORT}`);
+});
+
+app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
+    console.error('Unhandled error:', err.stack);
+    res.status(500).json({
+        message: 'Internal server error',
+    });
 });
