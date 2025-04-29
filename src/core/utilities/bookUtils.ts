@@ -1,36 +1,5 @@
 ﻿import { IBook } from '../models/book.model';
 
-function getAverageRating(
-    rating_1: number,
-    rating_2: number,
-    rating_3: number,
-    rating_4: number,
-    rating_5: number
-): number {
-    const totalRatings = getRatingCount(
-        rating_1,
-        rating_2,
-        rating_3,
-        rating_4,
-        rating_5
-    );
-
-    const totalWeightedRatings =
-        rating_1 + 2 * rating_2 + 3 * rating_3 + 4 * rating_4 + 5 * rating_5;
-
-    return totalWeightedRatings / totalRatings;
-}
-
-function getRatingCount(
-    rating_1: number,
-    rating_2: number,
-    rating_3: number,
-    rating_4: number,
-    rating_5: number
-): number {
-    return rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
-}
-
 function toBook(row): IBook {
     const average = getAverageRating(
         row.rating_1_star,
@@ -74,6 +43,37 @@ function toBooks(rows): IBook[] {
     return rows.map(toBook);
 }
 
-const bookFunctions = { getAverageRating, getRatingCount, toBook, toBooks };
+function getAverageRating(
+    rating_1: number,
+    rating_2: number,
+    rating_3: number,
+    rating_4: number,
+    rating_5: number
+): number {
+    const totalRatings = getRatingCount(
+        rating_1,
+        rating_2,
+        rating_3,
+        rating_4,
+        rating_5
+    );
 
-export { bookFunctions };
+    const totalWeightedRatings =
+        rating_1 + 2 * rating_2 + 3 * rating_3 + 4 * rating_4 + 5 * rating_5;
+
+    return totalWeightedRatings / totalRatings;
+}
+
+function getRatingCount(
+    rating_1: number,
+    rating_2: number,
+    rating_3: number,
+    rating_4: number,
+    rating_5: number
+): number {
+    return rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
+}
+
+const bookUtils = { getAverageRating, getRatingCount, toBook, toBooks };
+
+export { bookUtils };

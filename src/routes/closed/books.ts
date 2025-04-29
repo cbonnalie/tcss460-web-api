@@ -2,7 +2,7 @@
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
 import { IBook } from '../../core/models/book.model';
-import { bookFunctions } from '../../core/utilities/bookFunctions';
+import { bookUtils } from '../../core/utilities/bookUtils';
 
 const booksRouter: Router = express.Router();
 
@@ -12,23 +12,25 @@ const booksRouter: Router = express.Router();
  */
 
 /**
- * @api {get} /books/title/:title Request to retrieve books by title
+ * @api {get} /books/ Request to retrieve books that contain the given query parameters
  *
- * @apiDescription Request to retrieve books from the DB that contain the given <code>title</code>
- *
- * @apiName GetBookByTitle
+ * @apiName GetBooks
  * @apiGroup Books
  *
  * @apiUse JWT
  *
- * @apiParam {string} title The title of the book to be retrieved
+ * @apiParam {string} [isbn13] The ISBN-13 of the book
+ * @apiParam {string} [authors] The authors of the book
+ * @apiParam {string} [publication_year] The publication year of the book
+ * @apiParam {string} [original_title] The original title of the book
+ * @apiParam {string} [title] The title of the book
  *
- * @apiSuccess {Object[]} books The array of book objects associated with <code>title</code>
- * @apiSuccess {number} books.id The ID of the book
- * @apiSuccess {number} books.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} books.authors The authors of the book
- * @apiSuccess {string} books.publication The publication year of the book
- * @apiSuccess {string} books.original_title The original title of the book
+ * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
+ * @apiSuccess {number} result.id The ID of the book
+ * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} result.authors The authors of the book
+ * @apiSuccess {string} result.publication The publication year of the book
+ * @apiSuccess {string} result.original_title The original title of the book
  * @apiSuccess {string} result.title The title of the book
  * @apiSuccess {Object} result.ratings The ratings of the book
  * @apiSuccess {number} result.ratings.average The average rating of the book
@@ -43,60 +45,104 @@ const booksRouter: Router = express.Router();
  * @apiSuccess {string} result.icons.small The URL of the small icon
  *
  * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (404: No books found) {String} message "No books found with title [title]"
+ * @apiError (400: Invalid query parameter type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (400: Invalid query parameter value) {String} message "Query parameter value not of required type - please refer to documentation"
+ * @apiError (404: No books found) {String} message "No books found for the given query"
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
 booksRouter.get(
-    '/title/:title',
+    '/',
+    // check if the query parameters are valid
     (request: Request, response: Response, next: NextFunction) => {
-        if (
-            request.params.title === null ||
-            request.params.title === undefined
-        ) {
-            response.status(400).send({
-                message:
-                    'No query parameter in url - please refer to documentation',
-            });
-        } else if (
-            !validationFunctions.isStringProvided(request.params.title)
-        ) {
-            response.status(400).send({
-                message:
-                    'Query parameter not of required type - please refer to documentation',
-            });
-        }
-        next();
-    },
-    (request: IJwtRequest, response: Response) => {
-        const theQuery = `
-            SELECT *
-            FROM books
-            WHERE title ILIKE $1
-        `;
-        const value = [`%${request.params.title}%`];
+        try {
+            // do we have a query parameter?
+            const query = request.query;
+            const queryLength = Object.keys(query).length;
+            if (queryLength === 0) {
+                return response.status(400).send({
+                    message:
+                        'No query parameter in url - please refer to documentation',
+                });
+            }
 
-        pool.query(theQuery, value)
-            .then((result) => {
-                if (result.rows.length > 0) {
-                    const books: IBook[] = bookFunctions.toBooks(result.rows);
-                    response.status(200).send({
-                        books: books,
-                    });
-                } else {
-                    response.status(404).send({
-                        message: 'No books found with title ',
-                        value,
+            for (let i = 0; i < queryLength; i++) {
+                const param = Object.keys(query)[i];
+                // is the query parameter valid?
+                if (!validationFunctions.isValidParam(param)) {
+                    return response.status(400).send({
+                        message:
+                            'Query parameter not of required type - please refer to documentation',
                     });
                 }
-            })
-            .catch((error) => {
-                console.error('DB Query error on GET by Title');
-                console.error(error);
-                response.status(500).send({
-                    message: 'server error - contact support',
+
+                const value = query[param];
+                // is the query parameter value valid?
+                if (!validationFunctions.checkParams(param, value)) {
+                    return response.status(400).send({
+                        message:
+                            'Query parameter value not of required type - please refer to documentation',
+                    });
+                }
+            }
+            next();
+        } catch (error) {
+            next(error);
+        }
+    },
+    async (request: Request, response: Response) => {
+        const query = request.query;
+        const queryLength = Object.keys(query).length;
+        let queryString: string = 'SELECT * FROM BOOKS WHERE ';
+
+        // loop through the query parameters and build the query string
+        for (let i = 0; i < queryLength; i++) {
+            const parameter = Object.keys(query)[i];
+            const isStringSearch =
+                typeof query[parameter] === 'string' && parameter !== 'isbn13';
+
+            /*
+             * if the parameter involves a title or author, wrap it in %'s
+             * so that we can check for partial matches.
+             */
+            if (isStringSearch) {
+                query[parameter] = `%${query[parameter]}%`;
+            }
+
+            /*
+             * if we are string searching, use ILIKE instead of =
+             * since ILIKE is case-insensitive.
+             *
+             * we also need to use $[i + 1] since the first parameter is $1.
+             */
+            queryString += `${parameter} ${isStringSearch ? 'ILIKE' : '='} $${i + 1}`;
+
+            // add "AND" if it's not the last parameter
+            if (i < queryLength - 1) {
+                queryString += ' AND ';
+            }
+        }
+        queryString += ';';
+
+        const values: any[] = [...Object.values(query)];
+
+        // execute the query
+        try {
+            const result = await pool.query(queryString, values);
+
+            if (result.rows.length > 0) {
+                const books = bookUtils.toBooks(result.rows);
+                return response.status(200).send({ result: books });
+            } else {
+                return response.status(404).send({
+                    message: 'No books found for the given query',
                 });
+            }
+        } catch (error) {
+            console.error('DB Query error on GET books', error);
+            return response.status(500).send({
+                message: 'server error - contact support',
             });
+        }
     }
 );
 
@@ -181,7 +227,7 @@ booksRouter.get(
             const result = await pool.query(theQuery, value);
 
             if (result.rows.length === 1) {
-                const book = bookFunctions.toBook(result.rows[0]);
+                const book = bookUtils.toBook(result.rows[0]);
                 return response.status(200).send({ result: book });
             } else {
                 return response.status(404).send({
@@ -192,94 +238,6 @@ booksRouter.get(
         } catch (error) {
             console.error('DB Query error on GET by ISBN', error);
         }
-    }
-);
-
-/**
- * @api {get} /books/author/:author Request to retrieve books by author
- *
- * @apiDescription Request to retrieve books from the DB that contain the specified <code>author</code>
- *
- * @apiName GetBooksByAuthor
- * @apiGroup Books
- *
- * @apiUse JWT
- *
- * @apiParam {string} author The author name to search for (partial match, case-insensitive)
- *
- * @apiSuccess {Object[]} books The array of book objects by the specified author
- * @apiSuccess {number} books.id The ID of the book
- * @apiSuccess {number} books.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} books.authors The authors of the book
- * @apiSuccess {string} books.publication The publication year of the book
- * @apiSuccess {string} books.original_title The original title of the book
- * @apiSuccess {string} books.title The title of the book
- * @apiSuccess {Object} books.ratings The ratings of the book
- * @apiSuccess {number} books.ratings.average The average rating
- * @apiSuccess {number} books.ratings.count Total rating count
- * @apiSuccess {number} books.ratings.rating_1 1-star ratings
- * @apiSuccess {number} books.ratings.rating_2 2-star ratings
- * @apiSuccess {number} books.ratings.rating_3 3-star ratings
- * @apiSuccess {number} books.ratings.rating_4 4-star ratings
- * @apiSuccess {number} books.ratings.rating_5 5-star ratings
- * @apiSuccess {Object} books.icons Book cover URLs
- * @apiSuccess {string} books.icons.large Large cover URL
- * @apiSuccess {string} books.icons.small Small cover URL
- *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (404: No books found) {String} message "No books found by author [author]"
- * @apiError (500: Server error) {String} message "server error - contact support"
- */
-booksRouter.get(
-    '/author/:author',
-    (request: Request, response: Response, next: NextFunction) => {
-        if (
-            request.params.author === null ||
-            request.params.author === undefined
-        ) {
-            response.status(400).send({
-                message:
-                    'No query parameter in url - please refer to documentation',
-            });
-        } else if (
-            !validationFunctions.isStringProvided(request.params.author)
-        ) {
-            response.status(400).send({
-                message:
-                    'Query parameter not of required type - please refer to documentation',
-            });
-        }
-        next();
-    },
-    (request: IJwtRequest, response: Response) => {
-        const theQuery = `
-            SELECT *
-            FROM books
-            WHERE authors ILIKE $1
-        `;
-        const value = [`%${request.params.author}%`];
-
-        pool.query(theQuery, value)
-            .then((result) => {
-                if (result.rows.length > 0) {
-                    const books: IBook[] = bookFunctions.toBooks(result.rows);
-                    response.status(200).send({
-                        books: books,
-                    });
-                } else {
-                    response.status(404).send({
-                        message: `No books found by author ${request.params.author}`,
-                    });
-                }
-            })
-            .catch((error) => {
-                console.error('DB Query error on GET by Author');
-                console.error(error);
-                response.status(500).send({
-                    message: 'server error - contact support',
-                });
-            });
     }
 );
 

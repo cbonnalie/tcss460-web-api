@@ -42,13 +42,33 @@ function isNumber(x: any): x is number {
     return typeof x === 'number';
 }
 
-// Feel free to add your own validations functions!
-// for example: isNumericProvided, isValidPassword, isValidEmail, etc
-// don't forget to export any
+function checkParams(param: string, value: any): boolean {
+    if (param === 'isbn13') {
+        return isNumberProvided(value) && String(value).length === 13;
+    }
+    if (param === 'publication_year') {
+        return isNumberProvided(value) && value > 0;
+    }
+    return isStringProvided(value);
+}
+
+export const validParams = [
+    'isbn13',
+    'authors',
+    'publication_year',
+    'original_title',
+    'title',
+]
+
+const isValidParam = (param: string): boolean => {
+    return validParams.includes(param);
+}
 
 const validationFunctions = {
     isStringProvided,
     isNumberProvided,
+    checkParams,
+    isValidParam,
 };
 
 export { validationFunctions };
