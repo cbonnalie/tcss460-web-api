@@ -23,7 +23,7 @@ CREATE TABLE Account_Credential (Credential_ID SERIAL PRIMARY KEY,
                       FOREIGN KEY(Account_ID) REFERENCES Account(Account_ID)
 );
 
-CREATE TABLE BOOKS (id INT PRIMARY KEY,
+CREATE TABLE BOOKS (id SERIAL PRIMARY KEY,
         isbn13 BIGINT,
         authors TEXT,
         publication_year INT,

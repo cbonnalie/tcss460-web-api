@@ -1,7 +1,6 @@
 ﻿import express, { NextFunction, Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
-import { IBook } from '../../core/models/book.model';
 import { bookUtils } from '../../core/utilities/bookUtils';
 
 const booksRouter: Router = express.Router();
@@ -146,100 +145,6 @@ booksRouter.get(
     }
 );
 
-/**
- * @api {get} /books/isbns/:isbn Request to retrieve a book by ISBN
- *
- * @apiDescription Request to retrieve a book from the DB by its <code>ISBN</code>.
- *
- * @apiName GetBookByISBN
- * @apiGroup Books
- *
- * @apiUse JWT
- *
- * @apiParam {number} isbn The ISBN of the book to be retrieved
- *
- * @apiSuccess {Object} result The book object associated with <code>isbn</code>
- * @apiSuccess {number} result.id The ID of the book
- * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} result.authors The authors of the book
- * @apiSuccess {string} result.publication The publication year of the book
- * @apiSuccess {string} result.original_title The original title of the book
- * @apiSuccess {string} result.title The title of the book
- * @apiSuccess {Object} result.ratings The ratings of the book
- * @apiSuccess {number} result.ratings.average The average rating of the book
- * @apiSuccess {number} result.ratings.count The number of ratings for the book
- * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
- * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
- * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
- * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
- * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
- * @apiSuccess {Object} result.icons The icons of the book
- * @apiSuccess {string} result.icons.large The URL of the large icon
- * @apiSuccess {string} result.icons.small The URL of the small icon
- *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (400: Invalid ISBN) {String} message "ISBN not in range - please refer to documentation"
- * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
- * @apiError (500: Server error) {String} message "server error - contact support"
- */
-booksRouter.get(
-    '/isbns/',
-    (request: Request, response: Response, next: NextFunction) => {
-        try {
-            const isbn = request.query.isbn;
-            if (isbn === null || isbn === undefined) {
-                return response.status(400).send({
-                    message:
-                        'No query parameter in url - please refer to documentation',
-                });
-            }
-
-            if (!validationFunctions.isNumberProvided(isbn)) {
-                return response.status(400).send({
-                    message:
-                        'Query parameter not of required type - please refer to documentation',
-                });
-            }
-
-            const isbnNumber = Number(isbn);
-            if (String(isbnNumber).length != 13) {
-                return response.status(400).send({
-                    message:
-                        'ISBN not in range - please refer to documentation',
-                });
-            }
-
-            next();
-        } catch (err) {
-            next(err);
-        }
-    },
-    async (request: IJwtRequest, response: Response) => {
-        try {
-            const theQuery = `
-                SELECT *
-                FROM BOOKS
-                WHERE isbn13 = $1
-            `;
-            const value = [request.query.isbn];
-
-            const result = await pool.query(theQuery, value);
-
-            if (result.rows.length === 1) {
-                const book = bookUtils.toBook(result.rows[0]);
-                return response.status(200).send({ result: book });
-            } else {
-                return response.status(404).send({
-                    isbn: value,
-                    message: 'Book not found for ISBN ' + value,
-                });
-            }
-        } catch (error) {
-            console.error('DB Query error on GET by ISBN', error);
-        }
-    }
-);
 
 /**
  * @api {post} /books/ Request to add a book
