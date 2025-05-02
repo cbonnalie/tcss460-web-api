@@ -5,6 +5,13 @@ import { bookUtils } from '../../core/utilities/bookUtils';
 
 const booksRouter: Router = express.Router();
 
+const toBooks = bookUtils.toBooks;
+const buildBooksQuery = bookUtils.buildBooksQuery;
+const checkParams = validationFunctions.checkParams;
+const isValidParam = validationFunctions.isValidParam;
+const isNumberProvided = validationFunctions.isNumberProvided;
+const isStringProvided = validationFunctions.isStringProvided;
+
 /**
  * @apiDefine JWT
  * @apiHeader {String} Authorization The string "Bearer " + a valid JSON Web Token (JWT).
@@ -23,6 +30,7 @@ const booksRouter: Router = express.Router();
  * @apiParam {string} [publication_year] The publication year of the book
  * @apiParam {string} [original_title] The original title of the book
  * @apiParam {string} [title] The title of the book
+ * @apiParam {string} [rating] The minimum rating of the book
  *
  * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
  * @apiSuccess {number} result.id The ID of the book
@@ -64,19 +72,20 @@ booksRouter.get(
                 });
             }
 
+            // check that each query parameter is valid
             for (let i = 0; i < queryLength; i++) {
                 const param = Object.keys(query)[i];
-                // is the query parameter valid?
-                if (!validationFunctions.isValidParam(param)) {
+                if (!isValidParam(param)) {
                     return response.status(400).send({
                         message:
                             'Query parameter not of required type - please refer to documentation',
                     });
                 }
 
+                // check that the value of the query parameter is of the correct type
+                // and that it is in the correct range
                 const value = query[param];
-                // is the query parameter value valid?
-                if (!validationFunctions.checkParams(param, value)) {
+                if (!checkParams(param, value)) {
                     return response.status(400).send({
                         message:
                             'Query parameter value not of required type - please refer to documentation',
@@ -89,48 +98,19 @@ booksRouter.get(
         }
     },
     async (request: Request, response: Response) => {
-        const query = request.query;
-        const queryLength = Object.keys(query).length;
-        let queryString: string = 'SELECT * FROM BOOKS WHERE ';
-
-        // loop through the query parameters and build the query string
-        for (let i = 0; i < queryLength; i++) {
-            const parameter = Object.keys(query)[i];
-            const isStringSearch =
-                typeof query[parameter] === 'string' && parameter !== 'isbn13';
-
-            /*
-             * if the parameter involves a title or author, wrap it in %'s
-             * so that we can check for partial matches.
-             */
-            if (isStringSearch) {
-                query[parameter] = `%${query[parameter]}%`;
-            }
-
-            /*
-             * if we are string searching, use ILIKE instead of =
-             * since ILIKE is case-insensitive.
-             *
-             * we also need to use $[i + 1] since the first parameter is $1.
-             */
-            queryString += `${parameter} ${isStringSearch ? 'ILIKE' : '='} $${i + 1}`;
-
-            // add "AND" if it's not the last parameter
-            if (i < queryLength - 1) {
-                queryString += ' AND ';
-            }
-        }
-        queryString += ';';
-
-        const values: any[] = [...Object.values(query)];
-
-        // execute the query
         try {
+            // build the query string and values to be passed to the database
+            const query = request.query;
+            const { queryString, values } = buildBooksQuery(query);
+
+            console.log(queryString);
+            console.log(values);
+            // then execute the query
             const result = await pool.query(queryString, values);
 
             if (result.rows.length > 0) {
-                const books = bookUtils.toBooks(result.rows);
-                return response.status(200).send({ result: books });
+                const books = toBooks(result.rows);
+                return response.status(200).send({ books: books });
             } else {
                 return response.status(404).send({
                     message: 'No books found for the given query',
@@ -145,6 +125,67 @@ booksRouter.get(
     }
 );
 
+/**
+ * @api {get} /books/all Request to retrieve all books (with pagination)
+ *
+ * @apiName GetAllBooks
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
+ * @apiSuccess {number} result.id The ID of the book
+ * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} result.authors The authors of the book
+ * @apiSuccess {string} result.publication The publication year of the book
+ * @apiSuccess {string} result.original_title The original title of the book
+ * @apiSuccess {string} result.title The title of the book
+ * @apiSuccess {Object} result.ratings The ratings of the book
+ * @apiSuccess {number} result.ratings.average The average rating of the book
+ * @apiSuccess {number} result.ratings.count The number of ratings for the book
+ * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
+ * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
+ * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
+ * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
+ * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
+ * @apiSuccess {Object} result.icons The icons of the book
+ * @apiSuccess {string} result.icons.large The URL of the large icon
+ * @apiSuccess {string} result.icons.small The URL of the small icon
+ *
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.get('/all', async (request: Request, response: Response) => {
+    const theQuery = `SELECT *
+                      FROM books
+                      WHERE id > $2
+                      ORDER BY id LIMIT $1`;
+
+    const limit: number =
+        isNumberProvided(request.query.limit) && +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const cursor: number =
+        isNumberProvided(request.query.cursor) && +request.query.cursor >= 0
+            ? +request.query.cursor
+            : 0;
+
+    const values = [limit, cursor];
+    const { rows } = await pool.query(theQuery, values);
+    const result = await pool.query('SELECT COUNT(*) AS count FROM books;');
+    const count = result.rows[0].count;
+
+    response.send({
+        books: toBooks(rows),
+        pagination: {
+            totalRecords: count,
+            limit,
+            rowsReturned: rows.length,
+            cursor: rows
+                .map((row) => row.id)
+                .reduce((max, id) => (id > max ? id : max), 0),
+        },
+    });
+});
 
 /**
  * @api {post} /books/ Request to add a book
@@ -188,9 +229,7 @@ booksRouter.post(
             response.status(400).send({
                 message: 'book id not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.book_id)
-        ) {
+        } else if (!isNumberProvided(request.body.book_id)) {
             response.status(400).send({
                 message:
                     'book_id must be a number - please refer to documentation',
@@ -205,7 +244,7 @@ booksRouter.post(
             response.status(400).send({
                 message: 'ISBN not provided - please refer to documentation',
             });
-        } else if (!validationFunctions.isNumberProvided(request.body.isbn13)) {
+        } else if (!isNumberProvided(request.body.isbn13)) {
             response.status(400).send({
                 message:
                     'ISBN must be a number - please refer to documentation',
@@ -223,9 +262,7 @@ booksRouter.post(
             response.status(400).send({
                 message: 'Author not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isStringProvided(request.body.authors)
-        ) {
+        } else if (!isStringProvided(request.body.authors)) {
             response.status(400).send({
                 message:
                     'Author must be a string - please refer to documentation',
@@ -244,11 +281,7 @@ booksRouter.post(
                 message:
                     'Publication year not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(
-                request.body.original_publication_year
-            )
-        ) {
+        } else if (!isNumberProvided(request.body.original_publication_year)) {
             response.status(400).send({
                 message:
                     'Publication year must be a number - please refer to documentation',
@@ -267,9 +300,7 @@ booksRouter.post(
                 message:
                     'Original title not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isStringProvided(request.body.original_title)
-        ) {
+        } else if (!isStringProvided(request.body.original_title)) {
             response.status(400).send({
                 message:
                     'Original title must be a string - please refer to documentation',
@@ -284,7 +315,7 @@ booksRouter.post(
             response.status(400).send({
                 message: 'Title not provided - please refer to documentation',
             });
-        } else if (!validationFunctions.isStringProvided(request.body.title)) {
+        } else if (isStringProvided(request.body.title)) {
             response.status(400).send({
                 message:
                     'Title must be a string - please refer to documentation',
@@ -303,9 +334,7 @@ booksRouter.post(
                 message:
                     'Ratings 1 not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_1)
-        ) {
+        } else if (!isNumberProvided(request.body.ratings_1)) {
             response.status(400).send({
                 message:
                     'Ratings 1 must be a number - please refer to documentation',
@@ -324,9 +353,7 @@ booksRouter.post(
                 message:
                     'Ratings 2 not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_2)
-        ) {
+        } else if (!isNumberProvided(request.body.ratings_2)) {
             response.status(400).send({
                 message:
                     'Ratings 2 must be a number - please refer to documentation',
@@ -345,9 +372,7 @@ booksRouter.post(
                 message:
                     'Ratings 3 not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_3)
-        ) {
+        } else if (!isNumberProvided(request.body.ratings_3)) {
             response.status(400).send({
                 message:
                     'Ratings 3 must be a number - please refer to documentation',
@@ -366,9 +391,7 @@ booksRouter.post(
                 message:
                     'Ratings 4 not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_4)
-        ) {
+        } else if (!isNumberProvided(request.body.ratings_4)) {
             response.status(400).send({
                 message:
                     'Ratings 4 must be a number - please refer to documentation',
@@ -387,9 +410,7 @@ booksRouter.post(
                 message:
                     'Ratings 5 not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isNumberProvided(request.body.ratings_5)
-        ) {
+        } else if (!isNumberProvided(request.body.ratings_5)) {
             response.status(400).send({
                 message:
                     'Ratings 5 must be a number - please refer to documentation',
@@ -408,9 +429,7 @@ booksRouter.post(
                 message:
                     'Image URL not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isStringProvided(request.body.image_url)
-        ) {
+        } else if (!isStringProvided(request.body.image_url)) {
             response.status(400).send({
                 message:
                     'Wrong type for image URL - please refer to documentation',
@@ -429,9 +448,7 @@ booksRouter.post(
                 message:
                     'Small image URL not provided - please refer to documentation',
             });
-        } else if (
-            !validationFunctions.isStringProvided(request.body.small_image_url)
-        ) {
+        } else if (!isStringProvided(request.body.small_image_url)) {
             response.status(400).send({
                 message:
                     'Wrong type for small image URL - please refer to documentation',

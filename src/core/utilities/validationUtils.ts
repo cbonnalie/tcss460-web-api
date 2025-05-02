@@ -49,6 +49,9 @@ function checkParams(param: string, value: any): boolean {
     if (param === 'publication_year') {
         return isNumberProvided(value) && value > 0;
     }
+    if (param === 'rating') {
+        return isNumberProvided(value) && value >= 0 && value <= 5;
+    }
     return isStringProvided(value);
 }
 
@@ -58,6 +61,7 @@ export const validParams = [
     'publication_year',
     'original_title',
     'title',
+    'rating',
 ]
 
 const isValidParam = (param: string): boolean => {
