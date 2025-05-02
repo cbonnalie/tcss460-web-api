@@ -64,6 +64,10 @@ export const validParams = [
     'rating',
 ]
 
+/**
+ * Checks if a passed query parameter matches a valid attribute of the book.
+ * @param param
+ */
 const isValidParam = (param: string): boolean => {
     return validParams.includes(param);
 }

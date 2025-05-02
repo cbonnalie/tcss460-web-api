@@ -88,7 +88,7 @@ booksRouter.get(
                 if (!checkParams(param, value)) {
                     return response.status(400).send({
                         message:
-                            'Query parameter value not of required type - please refer to documentation',
+                            'Invalid query parameter value - please refer to documentation',
                     });
                 }
             }
@@ -98,40 +98,47 @@ booksRouter.get(
         }
     },
     async (request: Request, response: Response) => {
-        try {
-            // build the query string and values to be passed to the database
-            const query = request.query;
-            const { queryString, values } = buildBooksQuery(query);
+        const query = request.query;
+        const { queryString, values } = buildBooksQuery(query);
 
-            console.log(queryString);
-            console.log(values);
-            // then execute the query
-            const result = await pool.query(queryString, values);
-
-            if (result.rows.length > 0) {
-                const books = toBooks(result.rows);
-                return response.status(200).send({ books: books });
-            } else {
-                return response.status(404).send({
-                    message: 'No books found for the given query',
+        await pool
+            .query(queryString, values)
+            .then((result) => {
+                if (result.rows.length > 0) {
+                    const books = toBooks(result.rows);
+                    return response.status(200).send({ books: books });
+                } else {
+                    return response.status(404).send({
+                        message: 'No books found for the given query',
+                    });
+                }
+            })
+            .catch((error) => {
+                console.error('DB Query error on GET books', error);
+                return response.status(500).send({
+                    message: 'server error - contact support',
                 });
-            }
-        } catch (error) {
-            console.error('DB Query error on GET books', error);
-            return response.status(500).send({
-                message: 'server error - contact support',
             });
-        }
     }
 );
 
 /**
- * @api {get} /books/all Request to retrieve all books (with pagination)
+ * @api {get} /books/all Request to retrieve books by cursor pagination
  *
- * @apiName GetAllBooks
+ * @apiDescription Request to retrieve paginated books using a cursor.
+ *
+ * @apiName Books Cursor Pagination
  * @apiGroup Books
  *
  * @apiUse JWT
+ *
+ * @apiQuery {number} [limit=10] The number of books to return (default is 10).
+ * If a value less than zero is provided, or if a non-numeric value is provided,
+ * or if no value is provided, the default limit of 10 will be used.
+ *
+ * @apiQuery {number} [cursor=0] The cursor to start the pagination from (default is 0). When no cursor is
+ * provided, the result is the first set of paginated entries. Note, if a value less than 0 is provided
+ * or a non-numeric value is provided results will be the same as not providing a cursor.
  *
  * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
  * @apiSuccess {number} result.id The ID of the book
@@ -152,6 +159,12 @@ booksRouter.get(
  * @apiSuccess {string} result.icons.large The URL of the large icon
  * @apiSuccess {string} result.icons.small The URL of the small icon
  *
+ * @apiSuccess {Object} pagination Metadata results from the query
+ * @apiSuccess {number} pagination.totalRecords The total number of records in the database
+ * @apiSuccess {number} pagination.limit The number of records returned
+ * @apiSuccess {number} pagination.rowsReturned The number of records returned
+ * @apiSuccess {number} pagination.cursor The cursor for the next page of results
+ *
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
 booksRouter.get('/all', async (request: Request, response: Response) => {
@@ -164,27 +177,36 @@ booksRouter.get('/all', async (request: Request, response: Response) => {
         isNumberProvided(request.query.limit) && +request.query.limit > 0
             ? +request.query.limit
             : 10;
+
     const cursor: number =
         isNumberProvided(request.query.cursor) && +request.query.cursor >= 0
             ? +request.query.cursor
             : 0;
 
     const values = [limit, cursor];
-    const { rows } = await pool.query(theQuery, values);
-    const result = await pool.query('SELECT COUNT(*) AS count FROM books;');
-    const count = result.rows[0].count;
 
-    response.send({
-        books: toBooks(rows),
-        pagination: {
-            totalRecords: count,
-            limit,
-            rowsReturned: rows.length,
-            cursor: rows
-                .map((row) => row.id)
-                .reduce((max, id) => (id > max ? id : max), 0),
-        },
-    });
+    try {
+        const { rows } = await pool.query(theQuery, values);
+        const result = await pool.query('SELECT COUNT(*) AS count FROM books;');
+        const count = result.rows[0].count;
+
+        response.send({
+            books: toBooks(rows),
+            pagination: {
+                totalRecords: count,
+                limit,
+                rowsReturned: rows.length,
+                cursor: rows
+                    .map((row) => row.id)
+                    .reduce((max, id) => (id > max ? id : max), 0),
+            },
+        });
+    } catch (error) {
+        console.error('DB Query error on GET books', error);
+        response.status(500).send({
+            message: 'server error - contact support',
+        });
+    }
 });
 
 /**
@@ -220,24 +242,6 @@ booksRouter.get('/all', async (request: Request, response: Response) => {
  */
 booksRouter.post(
     '/',
-    // Book ID
-    (request: Request, response: Response, next: NextFunction) => {
-        if (
-            request.body.book_id === null ||
-            request.body.book_id === undefined
-        ) {
-            response.status(400).send({
-                message: 'book id not provided - please refer to documentation',
-            });
-        } else if (!isNumberProvided(request.body.book_id)) {
-            response.status(400).send({
-                message:
-                    'book_id must be a number - please refer to documentation',
-            });
-        } else {
-            next();
-        }
-    },
     // ISBN-13
     (request: Request, response: Response, next: NextFunction) => {
         if (request.body.isbn13 === null || request.body.isbn13 === undefined) {
@@ -314,11 +318,13 @@ booksRouter.post(
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
                 message: 'Title not provided - please refer to documentation',
+                value: request.body.title,
             });
-        } else if (isStringProvided(request.body.title)) {
+        } else if (!isStringProvided(request.body.title)) {
             response.status(400).send({
                 message:
                     'Title must be a string - please refer to documentation',
+                value: request.body.title,
             });
         } else {
             next();
@@ -459,13 +465,12 @@ booksRouter.post(
     },
     (request: IJwtRequest, response: Response) => {
         const theQuery = `
-            INSERT INTO books (id, isbn13, authors, publication_year, original_title, title,
+            INSERT INTO books (isbn13, authors, publication_year, original_title, title,
                                rating_1_star, rating_2_star, rating_3_star, rating_4_star, rating_5_star, image_url,
                                image_small_url)
-            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13);
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12);
         `;
         const values = [
-            request.body.book_id,
             request.body.isbn13,
             request.body.authors,
             request.body.publication_year,
