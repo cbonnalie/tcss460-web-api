@@ -27,7 +27,7 @@ CREATE TABLE Account_Credential (Credential_ID SERIAL PRIMARY KEY,
 
 
 DROP TABLE IF EXISTS BOOKS;
-CREATE TABLE BOOKS (id INT PRIMARY KEY,
+CREATE TABLE BOOKS (id SERIAL PRIMARY KEY,
         isbn13 BIGINT,
         authors TEXT,
         publication_year INT,
@@ -41,3 +41,8 @@ CREATE TABLE BOOKS (id INT PRIMARY KEY,
         image_url TEXT,
         image_small_url TEXT
     );
+
+CREATE SEQUENCE books_id_seq;
+ALTER TABLE books ALTER COLUMN id SET DEFAULT nextval('books_id_seq');
+ALTER SEQUENCE books_id_seq OWNED BY books.id;
+SELECT setval('books_id_seq', 10000, true);
