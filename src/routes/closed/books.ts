@@ -502,7 +502,7 @@ booksRouter.post(
 );
 
 /**
- * @api {patch} /books/ratings/ :isbn Update a book's ratings
+ * @api {patch} /books/ratings/:isbn Update a book's ratings
  * 
  * @apiDescription Request to update rating counts for a specifc book identified by ISBN.
  * 
@@ -511,7 +511,7 @@ booksRouter.post(
  * 
  * @apiUse JWT
  * 
- * @apiParam {number} isbn The ISBN of the book to be updated
+ * @apiParam {string} isbn The ISBN-13 of the book to be updated
  * @apiParam {number} ratingType The star rating to be updated (1-5)
  * @apiParam {number} value The value to set/add to the rating count (non-negative integer)
  * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value)
@@ -547,14 +547,9 @@ booksRouter.patch(
     //ISBN Validation
     (request: Request, response: Response, next: NextFunction) => {
         const isbn = request.params.isbn;
-        if (!validationFunctions.isNumberProvided(isbn)) {
+        if (!/^\d{13}$/.test(isbn)) {
             return response.status(400).send({
-                message: 'ISBN must be a number - please refer to documentation'
-            });
-        }
-        if (String(isbn).length !== 13) {
-            return response.status(400).send({
-                message: 'Invalid ISBN format - please refer to documentation'
+                message: 'Invalid ISBN format - must be 13 digits'
             });
         }
         next();
@@ -625,7 +620,8 @@ booksRouter.patch(
                 });
             }
 
-            const updatedBook = toBooks(result.rows[0]);
+            
+            const updatedBook = toBooks([result.rows[0]])[0];
             return response.status(200).send({
                 result: updatedBook,
             });
