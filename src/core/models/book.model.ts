@@ -8,7 +8,7 @@
     rating_5: number;
 }
 
-export interface IUrlIcon {
+export interface IImageUrl {
     large: string;
     small: string;
 }
@@ -21,5 +21,5 @@ export interface IBook {
     original_title: string;
     title: string;
     ratings: IRatings;
-    icons: IUrlIcon;
+    images: IImageUrl;
 }

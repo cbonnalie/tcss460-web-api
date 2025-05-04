@@ -47,9 +47,9 @@ const isStringProvided = validationFunctions.isStringProvided;
  * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
  * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
  * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
- * @apiSuccess {Object} result.icons The icons of the book
- * @apiSuccess {string} result.icons.large The URL of the large icon
- * @apiSuccess {string} result.icons.small The URL of the small icon
+ * @apiSuccess {Object} result.images The book images
+ * @apiSuccess {string} result.images.large URL of the large book image
+ * @apiSuccess {string} result.images.small URL of the small book image
  *
  * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
  * @apiError (400: Invalid query parameter type) {String} message "Query parameter not of required type - please refer to documentation"
@@ -121,93 +121,6 @@ booksRouter.get(
             });
     }
 );
-
-/**
- * @api {get} /books/all Request to retrieve books by cursor pagination
- *
- * @apiDescription Request to retrieve paginated books using a cursor.
- *
- * @apiName Books Cursor Pagination
- * @apiGroup Books
- *
- * @apiUse JWT
- *
- * @apiQuery {number} [limit=10] The number of books to return (default is 10).
- * If a value less than zero is provided, or if a non-numeric value is provided,
- * or if no value is provided, the default limit of 10 will be used.
- *
- * @apiQuery {number} [cursor=0] The cursor to start the pagination from (default is 0). When no cursor is
- * provided, the result is the first set of paginated entries. Note, if a value less than 0 is provided
- * or a non-numeric value is provided results will be the same as not providing a cursor.
- *
- * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
- * @apiSuccess {number} result.id The ID of the book
- * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} result.authors The authors of the book
- * @apiSuccess {string} result.publication The publication year of the book
- * @apiSuccess {string} result.original_title The original title of the book
- * @apiSuccess {string} result.title The title of the book
- * @apiSuccess {Object} result.ratings The ratings of the book
- * @apiSuccess {number} result.ratings.average The average rating of the book
- * @apiSuccess {number} result.ratings.count The number of ratings for the book
- * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
- * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
- * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
- * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
- * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
- * @apiSuccess {Object} result.icons The icons of the book
- * @apiSuccess {string} result.icons.large The URL of the large icon
- * @apiSuccess {string} result.icons.small The URL of the small icon
- *
- * @apiSuccess {Object} pagination Metadata results from the query
- * @apiSuccess {number} pagination.totalRecords The total number of records in the database
- * @apiSuccess {number} pagination.limit The number of records returned
- * @apiSuccess {number} pagination.rowsReturned The number of records returned
- * @apiSuccess {number} pagination.cursor The cursor for the next page of results
- *
- * @apiError (500: Server error) {String} message "server error - contact support"
- */
-booksRouter.get('/all', async (request: Request, response: Response) => {
-    const theQuery = `SELECT *
-                      FROM books
-                      WHERE id > $2
-                      ORDER BY id LIMIT $1`;
-
-    const limit: number =
-        isNumberProvided(request.query.limit) && +request.query.limit > 0
-            ? +request.query.limit
-            : 10;
-
-    const cursor: number =
-        isNumberProvided(request.query.cursor) && +request.query.cursor >= 0
-            ? +request.query.cursor
-            : 0;
-
-    const values = [limit, cursor];
-
-    try {
-        const { rows } = await pool.query(theQuery, values);
-        const result = await pool.query('SELECT COUNT(*) AS count FROM books;');
-        const count = result.rows[0].count;
-
-        response.send({
-            books: toBooks(rows),
-            pagination: {
-                totalRecords: count,
-                limit,
-                rowsReturned: rows.length,
-                cursor: rows
-                    .map((row) => row.id)
-                    .reduce((max, id) => (id > max ? id : max), 0),
-            },
-        });
-    } catch (error) {
-        console.error('DB Query error on GET books', error);
-        response.status(500).send({
-            message: 'server error - contact support',
-        });
-    }
-});
 
 /**
  * @api {post} /books/ Request to add a book

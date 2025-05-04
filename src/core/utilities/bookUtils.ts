@@ -87,7 +87,7 @@ function toBook(row): IBook {
             rating_4: row.rating_4_star,
             rating_5: row.rating_5_star,
         },
-        icons: {
+        images: {
             large: row.image_url,
             small: row.image_small_url,
         },

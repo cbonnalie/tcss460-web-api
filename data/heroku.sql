@@ -41,3 +41,4 @@ CREATE TABLE BOOKS (id SERIAL PRIMARY KEY,
         image_url TEXT,
         image_small_url TEXT
     );
+
