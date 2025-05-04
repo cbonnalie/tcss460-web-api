@@ -1,0 +1,576 @@
+{
+	"info": {
+		"_postman_id": "2692336c-5f7c-43cf-88fe-885f2de893b0",
+		"name": "Books_patch",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44130128",
+		"_collection_link": "https://markkulibaba.postman.co/workspace/Mark-Kulibaba's-Workspace~83877fce-8580-4a2c-8b02-f53fc2cbff23/collection/44130128-2692336c-5f7c-43cf-88fe-885f2de893b0?action=share&source=collection_link&creator=44130128"
+	},
+	"item": [
+		{
+			"name": "200 Valid/Increment",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book rating incremented\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.result).to.have.property(\"ratings\");\r",
+							"    pm.expect(json.result.ratings).to.have.property(\"rating_4\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 Valid/Set",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book rating set to new value\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.result).to.have.property(\"ratings\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 9500,\r\n    \"action\": \"set\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 Valid/Decrement",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book rating decremented but not below zero\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    const rating = json.result.ratings[\"rating_4\"];\r",
+							"    pm.expect(rating).to.be.at.least(0);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"decrement\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "200 Default Action",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Default action used is set\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.result).to.have.property(\"ratings\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 9407\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 Invalid ISBN Format",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"ISBN format error\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message).to.include(\"Invalid ISBN format\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/12345",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"12345"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 Invalid Rating Type",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Invalid rating type error\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message).to.include(\"Rating type must be between 1-5\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 6,\r\n    \"value\": 1,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 Invalid Value",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", function () {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Invalid value error\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message).to.include(\"Value must be a whole number\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 4.5,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 Invalid Action",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 400\", () => {\r",
+							"    pm.response.to.have.status(400);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Valid Actions Listed\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"set\");\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"increment\");\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"decrement\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"multiply\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "400 Book Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 404\", function () {\r",
+							"    pm.response.to.have.status(404);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Book not found\", function () {\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message).to.include(\"Book not found\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN\n}}",
+							"type": "string"
+						}
+					]
+				},
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097501",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097501"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "401 Auth Token Not Found",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 401\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"});\r",
+							"\r",
+							"pm.test(\"Authorization error\", function () {\r",
+							"    pm.response.to.have.status(401);\r",
+							"    const json = pm.response.json();\r",
+							"    pm.expect(json.message.toLowerCase()).to.include(\"auth token is not supplied\");\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "PATCH",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"ratingType\": 4,\r\n    \"value\": 1,\r\n    \"action\": \"increment\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/books/ratings/9780691097500",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"books",
+						"ratings",
+						"9780691097500"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
