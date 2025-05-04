@@ -1,4 +1,4 @@
-﻿import express, { NextFunction, Request, Response, Router } from 'express';
+import express, { NextFunction, Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
 import { bookUtils } from '../../core/utilities/bookUtils';
@@ -231,7 +231,6 @@ booksRouter.post(
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
                 message: 'Title not provided - please refer to documentation',
-                value: request.body.title,
             });
         } else if (!isStringProvided(request.body.title)) {
             response.status(400).send({
@@ -415,150 +414,167 @@ booksRouter.post(
 );
 
 /**
- * @api {patch} /books/ratings/:isbn Update a book's ratings
- * 
- * @apiDescription Request to update rating counts for a specifc book identified by ISBN.
- * 
- * @apiName UpdateBookRatings
+ * @api {get} /offset Request to retrieve books with offset pagination
+ *
+ * @apiDescription Request to retrieve books from the DB with offset pagination using limit and offset query parameters.
+ *
+ * @apiName GetAllBooksWithPagination
  * @apiGroup Books
- * 
+ *
  * @apiUse JWT
- * 
- * @apiParam {string} isbn The ISBN-13 of the book to be updated
- * @apiParam {number} ratingType The star rating to be updated (1-5)
- * @apiParam {number} value The value to set/add/subtract to the rating count (non-negative integer)
- * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
- * 
- * @apiSuccess {Object} result The updated book object
- * @apiSuccess {number} result.id The ID of the book
- * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} result.authors The authors of the book
- * @apiSuccess {string} result.publication The publication year of the book
- * @apiSuccess {string} result.original_title The original title of the book
- * @apiSuccess {string} result.title The title of the book
- * @apiSuccess {Object} result.ratings The updated ratings object
- * @apiSuccess {number} result.ratings.average The new average rating
- * @apiSuccess {number} result.ratings.count The new total rating count
- * @apiSuccess {number} result.ratings.rating_1 Updated 1-star count
- * @apiSuccess {number} result.ratings.rating_2 Updated 2-star count
- * @apiSuccess {number} result.ratings.rating_3 Updated 3-star count
- * @apiSuccess {number} result.ratings.rating_4 Updated 4-star count
- * @apiSuccess {number} result.ratings.rating_5 Updated 5-star count
- * @apiSuccess {Object} result.icons Cover URLs
- * @apiSuccess {string} result.icons.large Large cover image URL
- * @apiSuccess {string} result.icons.small Small cover image URL
- * 
- * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
- * @apiError (400: Invalid rating type) {String} message "Rating type must be between 1-5"
- * @apiError (400: Invalid value) {String} message "Value must be a non-negative integer"
- * @apiError (400: Invalid action) {String} message "Action must be either 'set', 'increment', or decrement'"
- * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [offset=0] The offset to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit The number of entry objects to returned.
+ * @apiSuccess {number} pagination.offset The number used to offset the lookup of entry objects.
+ * @apiSuccess {number} pagination.nextPage The offset that should be used on a preceding call to this route.
+ * @apiSuccess {Object[]} entries The message entry objects of all entries
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
-booksRouter.patch(
-    '/ratings/:isbn',
-    //ISBN Validation
-    (request: Request, response: Response, next: NextFunction) => {
-        const isbn = request.params.isbn;
-        if (!/^\d{13}$/.test(isbn)) {
-            return response.status(400).send({
-                message: 'Invalid ISBN format - must be 13 digits'
-            });
-        }
-        next();
-    },
-    //Rating Type Validation
-    (request: Request, response: Response, next: NextFunction) => {
-        const ratingType = request.body.ratingType;
-        if (!validationFunctions.isNumberProvided(ratingType)) {
-            return response.status(400).send({
-                message: 'Rating type must be a number - please refer to documentation'
-            });
-        }
-        if (ratingType < 1 || ratingType > 5) {
-            return response.status(400).send({
-                message: 'Rating type must be between 1-5 - please refer to documentation'
-            });
-        }
-        next();
-    },
-    //Value Validation
-    (request: Request, response: Response, next: NextFunction) => {
-        const value = request.body.value;
-        if (!validationFunctions.isNumberProvided(value)) {
-            return response.status(400).send({
-                message: 'Value must be a number - please refer to documentation'
-            });
-        }
-        if (!Number.isInteger(value) || value < 0) {
-            return response.status(400).send({
-                message: 'Value must be a whole number (non-negative integer) - please refer to documentation'
-            });
-        }
-        next();
-    },
-    //Action Validation
-    (request: Request, response: Response, next: NextFunction) => {
-        const action = request.body.action || 'set'; // Default to 'set'
-        if (!['set', 'increment', 'decrement'].includes(action)) {
-            return response.status(400).send({
-                message: "Action must be either 'set', 'increment', or 'decrement' - please refer to documentation"
-            });
-        }
-        next();
-    },
-    async (request: IJwtRequest, response: Response) => {
-        const isbn = request.params.isbn;
-        const { ratingType, value } = request.body;
-        const action = request.body.action || 'set'; // Default to 'set'
 
-        try {
-            const ratingColumn = `rating_${ratingType}_star`;
-            let operation : string;
+/**
+ * async is used to declare an asynchronous function. It allows us to use the await keyword inside the function.
+ * The await keyword is used to wait for a promise to resolve or reject before continuing the execution of the code.
+ * It allows us to pause and wait for other asynchronous operations to complete before moving on to the next line of code.
+ * This is useful for handling asynchronous operations in a more readable and manageable way.
+ *
+ * async is useful for API calls and DB queries.
+ * Always want to return a promise.
+ */
+booksRouter.get('/offset', async (request: Request, response: Response) => {
+    // the + tells TS to treat this string as a number
+    // We cab always change the size of the limit and offset in the future
+    const limit =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const offset =
+        validationFunctions.isNumberProvided(request.query.offset) &&
+        +request.query.offset >= 0
+            ? +request.query.offset
+            : 0;
 
-            switch (action) {
-                case 'increment':
-                    operation = `${ratingColumn} + $1`;
-                    break;
-                case 'decrement':
-                    operation = `GREATEST(${ratingColumn} - $1, 0)`; // Ensure it doesn't go below 0
-                    break;
-                case 'set':
-                default:
-                    operation = `$1`;
-                    break;
+    const theQuery = `SELECT * 
+                      FROM books 
+                      ORDER BY id 
+                      LIMIT $1 OFFSET $2`;
+    const values = [limit, offset];
 
-            }
+    // deconstructuring the returned object. const {rows}
+    const { rows } = await pool.query(theQuery, values);
 
-            const updateQuery = `
-                UPDATE books
-                SET ${ratingColumn} = ${operation}
-                WHERE isbn13 = $2
-                RETURNING *;
-            `;
+    // slow on datasets (especially on large datasets)
+    /**
+     * await (promise syntax) is a keyword that is used to pause execution of an async
+     * function until a promise resolves or rejects. It can only be used inside an async function.
+     * Basically, it waits here until the result is returned.
+     */
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
+    response.send({
+        entries: rows.map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            offset,
+            nextPage: limit + offset,
+        },
+    });
+});
 
-            const result = await pool.query(updateQuery, [value, isbn]);
+/**
+ * @api {get} /cursor Request to retrieve books with pagination
+ *
+ * @apiDescription Request to retrieve books from the DB with pagination using limit and cursor query parameters.
+ *
+ * @apiName GetAllBooksWithPagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [cursor=0] The cursor to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit The number of entry objects to returned.
+ * @apiSuccess {number} pagination.cursor The cursor that was used to offset the lookup of entry objects.
+ * @apiSuccess {Object[]} entries The message entry objects of all entries
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.get('/cursor', async (request: Request, response: Response) => {
+    const theQuery = `SELECT *
+                      FROM books
+                      WHERE id > $2
+                      ORDER BY id
+                      LIMIT $1`;
 
-            if (result.rowCount === 0) {
-                return response.status(404).send({
-                    message: `Book not found for ISBN ${isbn}`,
-                });
-            }
+    // defaults
+    const limit: number =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const cursor: number =
+        validationFunctions.isNumberProvided(request.query.cursor) &&
+        +request.query.cursor >= 0
+            ? +request.query.cursor
+            : 0;
 
-            
-            const updatedBook = toBooks([result.rows[0]])[0];
-            return response.status(200).send({
-                result: updatedBook,
-            });
+    const values = [limit, cursor];
+    const { rows } = await pool.query(theQuery, values);
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
 
-        } catch (error) {
-            console.error('DB Query error on PATCH books/ratings', error);
-            return response.status(500).send({
-                message: 'server error - contact support',
-            });
-        }
-
-    }
-);
+    response.send({
+        //entries: rows.map((row) => toBook(row)),
+        entries: rows
+            .map(({ book_id, ...rest }) => rest)
+            .map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            cursor: rows
+                .map((row) => row.id)
+                .reduce((max, id) => (id > max ? id : max)),
+        },
+    });
+});
 
 export { booksRouter };
