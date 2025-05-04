@@ -12,8 +12,7 @@ function getAverage(
     rating_4: number,
     rating_5: number
 ): number {
-    const totalRatings =
-        rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
+    const totalRatings = rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
     const totalWeightedRatings =
         rating_1 + 2 * rating_2 + 3 * rating_3 + 4 * rating_4 + 5 * rating_5;
     return totalWeightedRatings / totalRatings;
@@ -26,19 +25,24 @@ function getRatingCount(
     rating_4: number,
     rating_5: number
 ): number {
-    return (
-        rating_1 +
-        rating_2 +
-        rating_3 +
-        rating_4 +
-        rating_5
-    );
+    return rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
 }
 
 function toBook(row): IBook {
-
-    const average = getAverage(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
-    const count = getRatingCount(row.rating_1_star, row.rating_2_star, row.rating_3_star, row.rating_4_star, row.rating_5_star);
+    const average = getAverage(
+        row.rating_1_star,
+        row.rating_2_star,
+        row.rating_3_star,
+        row.rating_4_star,
+        row.rating_5_star
+    );
+    const count = getRatingCount(
+        row.rating_1_star,
+        row.rating_2_star,
+        row.rating_3_star,
+        row.rating_4_star,
+        row.rating_5_star
+    );
 
     return {
         id: row.id,
@@ -205,20 +209,23 @@ booksRouter.get(
             const isbn = request.query.isbn;
             if (isbn === null || isbn === undefined) {
                 return response.status(400).send({
-                    message: 'No query parameter in url - please refer to documentation',
+                    message:
+                        'No query parameter in url - please refer to documentation',
                 });
             }
 
             if (!validationFunctions.isNumberProvided(isbn)) {
                 return response.status(400).send({
-                    message: 'Query parameter not of required type - please refer to documentation',
+                    message:
+                        'Query parameter not of required type - please refer to documentation',
                 });
             }
 
             const isbnNumber = Number(isbn);
             if (String(isbnNumber).length != 13) {
                 return response.status(400).send({
-                    message: 'ISBN not in range - please refer to documentation',
+                    message:
+                        'ISBN not in range - please refer to documentation',
                 });
             }
 
@@ -244,7 +251,7 @@ booksRouter.get(
             } else {
                 return response.status(404).send({
                     isbn: value,
-                    message: 'Book not found for ISBN ' + value
+                    message: 'Book not found for ISBN ' + value,
                 });
             }
         } catch (error) {
@@ -297,13 +304,15 @@ booksRouter.get(
             request.params.author === undefined
         ) {
             response.status(400).send({
-                message: 'No query parameter in url - please refer to documentation',
+                message:
+                    'No query parameter in url - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.params.author)
         ) {
             response.status(400).send({
-                message: 'Query parameter not of required type - please refer to documentation',
+                message:
+                    'Query parameter not of required type - please refer to documentation',
             });
         }
         next();
@@ -379,8 +388,7 @@ booksRouter.post(
             request.body.book_id === undefined
         ) {
             response.status(400).send({
-                message:
-                    'book id not provided - please refer to documentation',
+                message: 'book id not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isNumberProvided(request.body.book_id)
@@ -397,8 +405,7 @@ booksRouter.post(
     (request: Request, response: Response, next: NextFunction) => {
         if (request.body.isbn13 === null || request.body.isbn13 === undefined) {
             response.status(400).send({
-                message:
-                    'ISBN not provided - please refer to documentation',
+                message: 'ISBN not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isNumberProvided(request.body.isbn13)) {
             response.status(400).send({
@@ -416,8 +423,7 @@ booksRouter.post(
             request.body.authors === undefined
         ) {
             response.status(400).send({
-                message:
-                    'Author not provided - please refer to documentation',
+                message: 'Author not provided - please refer to documentation',
             });
         } else if (
             !validationFunctions.isStringProvided(request.body.authors)
@@ -478,8 +484,7 @@ booksRouter.post(
     (request: Request, response: Response, next: NextFunction) => {
         if (request.body.title === null || request.body.title === undefined) {
             response.status(400).send({
-                message:
-                    'Title not provided - please refer to documentation',
+                message: 'Title not provided - please refer to documentation',
             });
         } else if (!validationFunctions.isStringProvided(request.body.title)) {
             response.status(400).send({
@@ -675,5 +680,168 @@ booksRouter.post(
     }
 );
 
+/**
+ * @api {get} /offset Request to retrieve books with offset pagination
+ *
+ * @apiDescription Request to retrieve books from the DB with offset pagination using limit and offset query parameters.
+ *
+ * @apiName GetAllBooksWithPagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [offset=0] The offset to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit The number of entry objects to returned.
+ * @apiSuccess {number} pagination.offset The number used to offset the lookup of entry objects.
+ * @apiSuccess {number} pagination.nextPage The offset that should be used on a preceding call to this route.
+ * @apiSuccess {Object[]} entries The message entry objects of all entries
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+
+/**
+ * async is used to declare an asynchronous function. It allows us to use the await keyword inside the function.
+ * The await keyword is used to wait for a promise to resolve or reject before continuing the execution of the code.
+ * It allows us to pause and wait for other asynchronous operations to complete before moving on to the next line of code.
+ * This is useful for handling asynchronous operations in a more readable and manageable way.
+ *
+ * async is useful for API calls and DB queries.
+ * Always want to return a promise.
+ */
+booksRouter.get('/offset', async (request: Request, response: Response) => {
+    // the + tells TS to treat this string as a number
+    // We cab always change the size of the limit and offset in the future
+    const limit =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const offset =
+        validationFunctions.isNumberProvided(request.query.offset) &&
+        +request.query.offset >= 0
+            ? +request.query.offset
+            : 0;
+
+    const theQuery = `SELECT * 
+                      FROM books 
+                      ORDER BY id 
+                      LIMIT $1 OFFSET $2`;
+    const values = [limit, offset];
+
+    // deconstructuring the returned object. const {rows}
+    const { rows } = await pool.query(theQuery, values);
+
+    // slow on datasets (especially on large datasets)
+    /**
+     * await (promise syntax) is a keyword that is used to pause execution of an async
+     * function until a promise resolves or rejects. It can only be used inside an async function.
+     * Basically, it waits here until the result is returned.
+     */
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
+    response.send({
+        entries: rows.map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            offset,
+            nextPage: limit + offset,
+        },
+    });
+});
+
+/**
+ * @api {get} /cursor Request to retrieve books with pagination
+ *
+ * @apiDescription Request to retrieve books from the DB with pagination using limit and cursor query parameters.
+ *
+ * @apiName GetAllBooksWithPagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [cursor=0] The cursor to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
+ * @apiSuccess {number} pagination.limit The number of entry objects to returned.
+ * @apiSuccess {number} pagination.cursor The cursor that was used to offset the lookup of entry objects.
+ * @apiSuccess {Object[]} entries The message entry objects of all entries
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
+ * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.get('/cursor', async (request: Request, response: Response) => {
+    const theQuery = `SELECT *
+                      FROM books
+                      WHERE id > $2
+                      ORDER BY id
+                      LIMIT $1`;
+
+    // defaults
+    const limit: number =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const cursor: number =
+        validationFunctions.isNumberProvided(request.query.cursor) &&
+        +request.query.cursor >= 0
+            ? +request.query.cursor
+            : 0;
+
+    const values = [limit, cursor];
+    const { rows } = await pool.query(theQuery, values);
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
+
+    response.send({
+        //entries: rows.map((row) => toBook(row)),
+        entries: rows
+            .map(({ book_id, ...rest }) => rest)
+            .map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            cursor: rows
+                .map((row) => row.id)
+                .reduce((max, id) => (id > max ? id : max)),
+        },
+    });
+});
+
 export { booksRouter };
-    
