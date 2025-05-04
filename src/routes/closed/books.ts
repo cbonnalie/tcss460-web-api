@@ -513,8 +513,8 @@ booksRouter.post(
  * 
  * @apiParam {string} isbn The ISBN-13 of the book to be updated
  * @apiParam {number} ratingType The star rating to be updated (1-5)
- * @apiParam {number} value The value to set/add to the rating count (non-negative integer)
- * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value)
+ * @apiParam {number} value The value to set/add/subtract to the rating count (non-negative integer)
+ * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
  * 
  * @apiSuccess {Object} result The updated book object
  * @apiSuccess {number} result.id The ID of the book
@@ -538,7 +538,7 @@ booksRouter.post(
  * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
  * @apiError (400: Invalid rating type) {String} message "Rating type must be between 1-5"
  * @apiError (400: Invalid value) {String} message "Value must be a non-negative integer"
- * @apiError (400: Invalid action) {String} message "Action must be either 'set' or 'increment'"
+ * @apiError (400: Invalid action) {String} message "Action must be either 'set', 'increment', or decrement'"
  * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
  * @apiError (500: Server error) {String} message "server error - contact support"
  */
@@ -579,7 +579,7 @@ booksRouter.patch(
         }
         if (!Number.isInteger(value) || value < 0) {
             return response.status(400).send({
-                message: 'Value must be a non-negative integer - please refer to documentation'
+                message: 'Value must be a whole number (non-negative integer) - please refer to documentation'
             });
         }
         next();
@@ -587,9 +587,9 @@ booksRouter.patch(
     //Action Validation
     (request: Request, response: Response, next: NextFunction) => {
         const action = request.body.action || 'set'; // Default to 'set'
-        if (!['set', 'increment'].includes(action)) {
+        if (!['set', 'increment', 'decrement'].includes(action)) {
             return response.status(400).send({
-                message: "Action must be either 'set' or 'increment' - please refer to documentation"
+                message: "Action must be either 'set', 'increment', or 'decrement' - please refer to documentation"
             });
         }
         next();
@@ -601,9 +601,21 @@ booksRouter.patch(
 
         try {
             const ratingColumn = `rating_${ratingType}_star`;
-            const operation = action === `increment`
-                ? `${ratingColumn} + $1`
-                : `$1`;
+            let operation : string;
+
+            switch (action) {
+                case 'increment':
+                    operation = `${ratingColumn} + $1`;
+                    break;
+                case 'decrement':
+                    operation = `GREATEST(${ratingColumn} - $1, 0)`; // Ensure it doesn't go below 0
+                    break;
+                case 'set':
+                default:
+                    operation = `$1`;
+                    break;
+
+            }
 
             const updateQuery = `
                 UPDATE books
