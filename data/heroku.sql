@@ -42,3 +42,7 @@ CREATE TABLE BOOKS (id SERIAL PRIMARY KEY,
         image_small_url TEXT
     );
 
+CREATE SEQUENCE books_id_seq;
+ALTER TABLE books ALTER COLUMN id SET DEFAULT nextval('books_id_seq');
+ALTER SEQUENCE books_id_seq OWNED BY books.id;
+SELECT setval('books_id_seq', 10000, true);
