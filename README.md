@@ -38,6 +38,7 @@ throughout the week when needed.
     - Created route, documentation, and testing for getting books by author.
 - Noah
     - Created route, documentation, and testing for creating a book.
+    - Created route, documentation, and testing for pagination (both cursor and offset)
 
 ### Meetings
 
