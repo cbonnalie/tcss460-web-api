@@ -61,7 +61,6 @@ throughout the week when needed.
 - Mark
     - Created route, documentation, and testing for updaing a book's rating(s).
 - Noah
-    - Created route, documentation, and testing for creating a book.
     - Created route, documentation, and testing for pagination (both cursor and offset)
 
 ### Meetings
