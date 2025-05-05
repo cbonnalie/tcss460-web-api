@@ -150,6 +150,6 @@ function getRatingCount(
     return rating_1 + rating_2 + rating_3 + rating_4 + rating_5;
 }
 
-const bookUtils = { toBooks, buildBooksQuery };
+const bookUtils = { toBook, toBooks, buildBooksQuery };
 
 export { bookUtils };

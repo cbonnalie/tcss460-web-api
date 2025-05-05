@@ -1,0 +1,43 @@
+{
+	"info": {
+		"_postman_id": "070dec9f-5c42-48e4-abee-edd138c5810b",
+		"name": "Pagination",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44205907",
+		"_collection_link": "https://group9-tcss460-web-api.postman.co/workspace/Self~0c239c45-4288-48fa-922f-7a1162dcd3d2/collection/44205907-070dec9f-5c42-48e4-abee-edd138c5810b?action=share&source=collection_link&creator=44205907"
+	},
+	"item": [
+		{
+			"name": "OffsetPaginationDefaultTest",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "OffsetPaginationValueTest",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "CursorPaginationDefaultTest",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		},
+		{
+			"name": "CursorPaginationValueTest",
+			"request": {
+				"method": "GET",
+				"header": []
+			},
+			"response": []
+		}
+	]
+}

@@ -5,6 +5,7 @@ import { bookUtils } from '../../core/utilities/bookUtils';
 
 const booksRouter: Router = express.Router();
 
+const toBook = bookUtils.toBook;
 const toBooks = bookUtils.toBooks;
 const buildBooksQuery = bookUtils.buildBooksQuery;
 const checkParams = validationFunctions.checkParams;
