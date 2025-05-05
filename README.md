@@ -53,7 +53,7 @@ throughout the week when needed.
 ### Contribution
 
 - Christian
-    - 
+    - Created single GET route that can retrieve books by any combination of isbn, author, title, rating, and publication year.
 - Kaleb
     - Worked on fixed heroku database not having a serial ID.
     - Change password route, documentation, testing, and code.
