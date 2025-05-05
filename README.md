@@ -54,6 +54,7 @@ throughout the week when needed.
 
 - Christian
     - Created single GET route that can retrieve books by any combination of isbn, author, title, rating, and publication year.
+    - Helped troubleshoot Heroku database issues.
 - Kaleb
     - Worked on fixed heroku database not having a serial ID.
     - Change password route, documentation, testing, and code.
