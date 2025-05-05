@@ -59,7 +59,7 @@ throughout the week when needed.
     - Worked on fixed heroku database not having a serial ID.
     - Change password route, documentation, testing, and code.
 - Mark
-    - Created route, documentation, and testing for getting books by author.
+    - Created route, documentation, and testing for updaing a book's rating(s).
 - Noah
     - Created route, documentation, and testing for creating a book.
 
