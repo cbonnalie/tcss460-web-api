@@ -578,4 +578,151 @@ booksRouter.get('/cursor', async (request: Request, response: Response) => {
     });
 });
 
+/**
+ * @api {patch} /books/ratings/:isbn Update a book's ratings
+ *
+ * @apiDescription Request to update rating counts for a specifc book identified by ISBN.
+ *
+ * @apiName UpdateBookRatings
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {string} isbn The ISBN-13 of the book to be updated
+ * @apiParam {number} ratingType The star rating to be updated (1-5)
+ * @apiParam {number} value The value to set/add/subtract to the rating count (non-negative integer)
+ * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
+ *
+ * @apiSuccess {Object} result The updated book object
+ * @apiSuccess {number} result.id The ID of the book
+ * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} result.authors The authors of the book
+ * @apiSuccess {string} result.publication The publication year of the book
+ * @apiSuccess {string} result.original_title The original title of the book
+ * @apiSuccess {string} result.title The title of the book
+ * @apiSuccess {Object} result.ratings The updated ratings object
+ * @apiSuccess {number} result.ratings.average The new average rating
+ * @apiSuccess {number} result.ratings.count The new total rating count
+ * @apiSuccess {number} result.ratings.rating_1 Updated 1-star count
+ * @apiSuccess {number} result.ratings.rating_2 Updated 2-star count
+ * @apiSuccess {number} result.ratings.rating_3 Updated 3-star count
+ * @apiSuccess {number} result.ratings.rating_4 Updated 4-star count
+ * @apiSuccess {number} result.ratings.rating_5 Updated 5-star count
+ * @apiSuccess {Object} result.icons Cover URLs
+ * @apiSuccess {string} result.icons.large Large cover image URL
+ * @apiSuccess {string} result.icons.small Small cover image URL
+ *
+ * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
+ * @apiError (400: Invalid rating type) {String} message "Rating type must be between 1-5"
+ * @apiError (400: Invalid value) {String} message "Value must be a non-negative integer"
+ * @apiError (400: Invalid action) {String} message "Action must be either 'set', 'increment', or decrement'"
+ * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.patch(
+    '/ratings/:isbn',
+    //ISBN Validation
+    (request: Request, response: Response, next: NextFunction) => {
+        const isbn = request.params.isbn;
+        if (!/^\d{13}$/.test(isbn)) {
+            return response.status(400).send({
+                message: 'Invalid ISBN format - must be 13 digits'
+            });
+        }
+        next();
+    },
+    //Rating Type Validation
+    (request: Request, response: Response, next: NextFunction) => {
+        const ratingType = request.body.ratingType;
+        if (!validationFunctions.isNumberProvided(ratingType)) {
+            return response.status(400).send({
+                message: 'Rating type must be a number - please refer to documentation'
+            });
+        }
+        if (ratingType < 1 || ratingType > 5) {
+            return response.status(400).send({
+                message: 'Rating type must be between 1-5 - please refer to documentation'
+            });
+        }
+        next();
+    },
+    //Value Validation
+    (request: Request, response: Response, next: NextFunction) => {
+        const value = request.body.value;
+        if (!validationFunctions.isNumberProvided(value)) {
+            return response.status(400).send({
+                message: 'Value must be a number - please refer to documentation'
+            });
+        }
+        if (!Number.isInteger(value) || value < 0) {
+            return response.status(400).send({
+                message: 'Value must be a whole number (non-negative integer) - please refer to documentation'
+            });
+        }
+        next();
+    },
+    //Action Validation
+    (request: Request, response: Response, next: NextFunction) => {
+        const action = request.body.action || 'set'; // Default to 'set'
+        if (!['set', 'increment', 'decrement'].includes(action)) {
+            return response.status(400).send({
+                message: "Action must be either 'set', 'increment', or 'decrement' - please refer to documentation"
+            });
+        }
+        next();
+    },
+    async (request: IJwtRequest, response: Response) => {
+        const isbn = request.params.isbn;
+        const { ratingType, value } = request.body;
+        const action = request.body.action || 'set'; // Default to 'set'
+
+        try {
+            const ratingColumn = `rating_${ratingType}_star`;
+            let operation : string;
+
+            switch (action) {
+                case 'increment':
+                    operation = `${ratingColumn} + $1`;
+                    break;
+                case 'decrement':
+                    operation = `GREATEST(${ratingColumn} - $1, 0)`; // Ensure it doesn't go below 0
+                    break;
+                case 'set':
+                default:
+                    operation = `$1`;
+                    break;
+
+            }
+
+            const updateQuery = `
+                UPDATE books
+                SET ${ratingColumn} = ${operation}
+                WHERE isbn13 = $2
+                RETURNING *;
+            `;
+
+            const result = await pool.query(updateQuery, [value, isbn]);
+
+            if (result.rowCount === 0) {
+                return response.status(404).send({
+                    message: `Book not found for ISBN ${isbn}`,
+                });
+            }
+
+
+            const updatedBook = toBooks([result.rows[0]])[0];
+            return response.status(200).send({
+                result: updatedBook,
+            });
+
+        } catch (error) {
+            console.error('DB Query error on PATCH books/ratings', error);
+            return response.status(500).send({
+                message: 'server error - contact support',
+            });
+        }
+
+    }
+);
+
 export { booksRouter };

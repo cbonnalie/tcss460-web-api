@@ -1,43 +1,231 @@
 {
 	"info": {
-		"_postman_id": "070dec9f-5c42-48e4-abee-edd138c5810b",
+		"_postman_id": "ad5e35ea-a47c-44e4-a75a-a1753bb37e57",
 		"name": "Pagination",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "44205907",
-		"_collection_link": "https://group9-tcss460-web-api.postman.co/workspace/Self~0c239c45-4288-48fa-922f-7a1162dcd3d2/collection/44205907-070dec9f-5c42-48e4-abee-edd138c5810b?action=share&source=collection_link&creator=44205907"
+		"_exporter_id": "38541945",
+		"_collection_link": "https://tcss460-group-9.postman.co/workspace/Messages~2e6ff5c7-e4ec-43f4-a3fc-0a182c39f97e/collection/38541945-ad5e35ea-a47c-44e4-a75a-a1753bb37e57?action=share&source=collection_link&creator=38541945"
 	},
 	"item": [
 		{
 			"name": "OffsetPaginationDefaultTest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Default parameters for offset pagination, 200 status expected', function() {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/books/offset",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						"offset"
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "OffsetPaginationValueTest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Valued parameters for offset pagination, 200 status expected', function() {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/books/offset?limit=20&offset=35",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						"offset"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20"
+						},
+						{
+							"key": "offset",
+							"value": "35"
+						}
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "CursorPaginationDefaultTest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Default parameters for cursor pagination, 200 status expected', function() {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/books/cursor",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						"cursor"
+					]
+				}
 			},
 			"response": []
 		},
 		{
 			"name": "CursorPaginationValueTest",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test('Valued parameters for cursor pagination, 200 status expected', function() {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
 			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "{{ACCESS_TOKEN}}",
+							"type": "string"
+						}
+					]
+				},
 				"method": "GET",
-				"header": []
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}/books/cursor?limit=20&cursor=35",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"books",
+						"cursor"
+					],
+					"query": [
+						{
+							"key": "limit",
+							"value": "20"
+						},
+						{
+							"key": "cursor",
+							"value": "35"
+						}
+					]
+				}
 			},
 			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{ACCESS_TOKEN}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
 		}
 	]
 }
