@@ -45,3 +45,26 @@ All meetings in the beta sprint were held remotely. Asynchronous communication w
 throughout the week when needed.
 
 ### Comments
+
+
+
+## Beta Sprint II
+
+### Contribution
+
+- Christian
+    - 
+- Kaleb
+    - Worked on fixed heroku database not having a serial ID.
+    - Change password route, documentation, testing, and code.
+- Mark
+    - Created route, documentation, and testing for getting books by author.
+- Noah
+    - Created route, documentation, and testing for creating a book.
+
+### Meetings
+
+All meetings in the beta sprint were held remotely. Asynchronous communication was held
+throughout the week when needed.
+
+### Comments
