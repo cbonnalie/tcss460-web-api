@@ -589,9 +589,10 @@ booksRouter.get('/cursor', async (request: Request, response: Response) => {
  * @apiUse JWT
  *
  * @apiParam {string} isbn The ISBN-13 of the book to be updated
- * @apiParam {number} ratingType The star rating to be updated (1-5)
- * @apiParam {number} value The value to set/add/subtract to the rating count (non-negative integer)
  * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
+ *
+ * @apiBody {number} ratingType The star rating to be updated (1-5)
+ * @apiBody {number} value The value to set/add/subtract to the rating count (non-negative integer)
  *
  * @apiSuccess {Object} result The updated book object
  * @apiSuccess {number} result.id The ID of the book
