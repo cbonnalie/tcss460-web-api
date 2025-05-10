@@ -726,4 +726,86 @@ booksRouter.patch(
     }
 );
 
+/**
+ * @api {delete} /books/:isbn Delete a book by ISBN
+ *
+ * @apiDescription Request to delete a book from the database using its ISBN-13.
+ *
+ * @apiName DeleteBook
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {String} isbn The ISBN-13 of the book to delete
+ *
+ * @apiSuccess {String} message Success message confirming deletion
+ * @apiSuccess {Object} deletedBook The deleted book object
+ * @apiSuccess {number} deletedBook.id The ID of the book
+ * @apiSuccess {number} deletedBook.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} deletedBook.authors The authors of the book
+ * @apiSuccess {string} deletedBook.publication The publication year of the book
+ * @apiSuccess {string} deletedBook.original_title The original title of the book
+ * @apiSuccess {string} deletedBook.title The title of the book
+ * @apiSuccess {Object} deletedBook.ratings The ratings of the book
+ * @apiSuccess {number} deletedBook.ratings.average The average rating
+ * @apiSuccess {number} deletedBook.ratings.count Total rating count
+ * @apiSuccess {number} deletedBook.ratings.rating_1 1-star ratings
+ * @apiSuccess {number} deletedBook.ratings.rating_2 2-star ratings
+ * @apiSuccess {number} deletedBook.ratings.rating_3 3-star ratings
+ * @apiSuccess {number} deletedBook.ratings.rating_4 4-star ratings
+ * @apiSuccess {number} deletedBook.ratings.rating_5 5-star ratings
+ * @apiSuccess {Object} deletedBook.images The book images
+ * @apiSuccess {string} deletedBook.images.large URL of large image
+ * @apiSuccess {string} deletedBook.images.small URL of small image
+ *
+ * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
+ * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ */
+booksRouter.delete(
+    '/:isbn',
+    // ISBN Validation
+    (request: Request, response: Response, next: NextFunction) => {
+        const isbn = request.params.isbn;
+        if (!/^\d{13}$/.test(isbn)) {
+            return response.status(400).send({
+                message: 'Invalid ISBN format - must be 13 digits',
+            });
+        }
+        next();
+    },
+    async (request: Request, response: Response) => {
+        const isbn = request.params.isbn;
+
+        try {
+            const deleteQuery = `
+                DELETE FROM books
+                WHERE isbn13 = $1
+                RETURNING *;
+            `;
+
+            const result = await pool.query(deleteQuery, [isbn]);
+
+            if (result.rowCount === 0) {
+                return response.status(404).send({
+                    message: `Book not found for ISBN ${isbn}`,
+                });
+            }
+
+            const deletedBook = toBooks([result.rows[0]])[0];
+            return response.status(200).send({
+                message: 'Book deleted successfully',
+                deletedBook,
+            });
+
+        } catch (error) {
+            console.error('DB Query error on DELETE books', error);
+            return response.status(500).send({
+                message: 'server error - contact support',
+            });
+        }
+    }
+);
+
+
 export { booksRouter };
