@@ -8,18 +8,17 @@
     rating_5: number;
 }
 
-export interface IImageUrl {
+export interface IUrlIcon {
     large: string;
     small: string;
 }
 
 export interface IBook {
-    id: number;
     isbn13: number;
     authors: string;
     publication: number;
     original_title: string;
     title: string;
     ratings: IRatings;
-    images: IImageUrl;
+    icons: IUrlIcon;
 }

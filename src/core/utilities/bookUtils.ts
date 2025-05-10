@@ -72,7 +72,6 @@ function toBook(row): IBook {
     );
 
     return {
-        id: row.id,
         isbn13: row.isbn13,
         authors: row.authors,
         publication: row.publication_year,
@@ -87,7 +86,7 @@ function toBook(row): IBook {
             rating_4: row.rating_4_star,
             rating_5: row.rating_5_star,
         },
-        images: {
+        icons: {
             large: row.image_url,
             small: row.image_small_url,
         },

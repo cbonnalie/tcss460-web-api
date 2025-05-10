@@ -481,7 +481,7 @@ booksRouter.get('/offset', async (request: Request, response: Response) => {
                       LIMIT $1 OFFSET $2`;
     const values = [limit, offset];
 
-    // deconstructuring the returned object. const {rows}
+    // deconstructing the returned object. const {rows}
     const { rows } = await pool.query(theQuery, values);
 
     // slow on datasets (especially on large datasets)
