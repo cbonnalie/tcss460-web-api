@@ -740,10 +740,13 @@ booksRouter.delete(
                 message: 'Author not provided - please refer to documentation',
             });
         }
+
+        console.log(request.body.authors);
+
         try {
             const theQuery = `DELETE
                               FROM books
-                              WHERE authors = $1 RETURNING *`;
+                              WHERE authors ILIKE $1 RETURNING *`;
             const values = [request.body.authors];
             //const result = await pool.query(theQuery, values);
             const { rows } = await pool.query(theQuery, values);
