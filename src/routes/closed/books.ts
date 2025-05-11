@@ -246,14 +246,14 @@ booksRouter.post(
     // Ratings 1
     (request: Request, response: Response, next: NextFunction) => {
         if (
-            request.body.ratings_1 === null ||
-            request.body.ratings_1 === undefined
+            request.body.rating_1 === null ||
+            request.body.rating_1 === undefined
         ) {
             response.status(400).send({
                 message:
                     'Ratings 1 not provided - please refer to documentation',
             });
-        } else if (!isNumberProvided(request.body.ratings_1)) {
+        } else if (!isNumberProvided(request.body.rating_1)) {
             response.status(400).send({
                 message:
                     'Ratings 1 must be a number - please refer to documentation',
@@ -265,14 +265,14 @@ booksRouter.post(
     // Ratings 2
     (request: Request, response: Response, next: NextFunction) => {
         if (
-            request.body.ratings_2 === null ||
-            request.body.ratings_2 === undefined
+            request.body.rating_2 === null ||
+            request.body.rating_2 === undefined
         ) {
             response.status(400).send({
                 message:
                     'Ratings 2 not provided - please refer to documentation',
             });
-        } else if (!isNumberProvided(request.body.ratings_2)) {
+        } else if (!isNumberProvided(request.body.rating_2)) {
             response.status(400).send({
                 message:
                     'Ratings 2 must be a number - please refer to documentation',
@@ -284,14 +284,14 @@ booksRouter.post(
     // Ratings 3
     (request: Request, response: Response, next: NextFunction) => {
         if (
-            request.body.ratings_3 === null ||
-            request.body.ratings_3 === undefined
+            request.body.rating_3 === null ||
+            request.body.rating_3 === undefined
         ) {
             response.status(400).send({
                 message:
                     'Ratings 3 not provided - please refer to documentation',
             });
-        } else if (!isNumberProvided(request.body.ratings_3)) {
+        } else if (!isNumberProvided(request.body.rating_3)) {
             response.status(400).send({
                 message:
                     'Ratings 3 must be a number - please refer to documentation',
@@ -303,14 +303,14 @@ booksRouter.post(
     // Ratings 4
     (request: Request, response: Response, next: NextFunction) => {
         if (
-            request.body.ratings_4 === null ||
-            request.body.ratings_4 === undefined
+            request.body.rating_4 === null ||
+            request.body.rating_4 === undefined
         ) {
             response.status(400).send({
                 message:
                     'Ratings 4 not provided - please refer to documentation',
             });
-        } else if (!isNumberProvided(request.body.ratings_4)) {
+        } else if (!isNumberProvided(request.body.rating_4)) {
             response.status(400).send({
                 message:
                     'Ratings 4 must be a number - please refer to documentation',
@@ -322,14 +322,14 @@ booksRouter.post(
     // Ratings 5
     (request: Request, response: Response, next: NextFunction) => {
         if (
-            request.body.ratings_5 === null ||
-            request.body.ratings_5 === undefined
+            request.body.rating_5 === null ||
+            request.body.rating_5 === undefined
         ) {
             response.status(400).send({
                 message:
                     'Ratings 5 not provided - please refer to documentation',
             });
-        } else if (!isNumberProvided(request.body.ratings_5)) {
+        } else if (!isNumberProvided(request.body.rating_5)) {
             response.status(400).send({
                 message:
                     'Ratings 5 must be a number - please refer to documentation',
