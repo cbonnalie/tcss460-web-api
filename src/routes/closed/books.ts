@@ -741,8 +741,6 @@ booksRouter.delete(
             });
         }
 
-        console.log(request.body.authors);
-
         try {
             const theQuery = `DELETE
                               FROM books
