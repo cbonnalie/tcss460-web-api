@@ -758,7 +758,7 @@ booksRouter.delete(
             } else {
                 response.status(200).send({
                     message: `Books by author ${request.body.authors} deleted successfully`,
-                    deletedBooks: rows.map((row) => toBooks(row)),
+                    //deletedBooks: rows.map((row) => toBooks(row)),
                 });
             }
         } catch(error) {
