@@ -1,4 +1,4 @@
-import express, { NextFunction, Request, Response, Router } from 'express';
+﻿import express, { NextFunction, Request, Response, Router } from 'express';
 import { IJwtRequest } from '../../core/models';
 import { pool, validationFunctions } from '../../core/utilities';
 import { bookUtils } from '../../core/utilities/bookUtils';
@@ -627,7 +627,7 @@ booksRouter.patch(
         const isbn = request.params.isbn;
         if (!/^\d{13}$/.test(isbn)) {
             return response.status(400).send({
-                message: 'Invalid ISBN format - must be 13 digits'
+                message: 'Invalid ISBN format - must be 13 digits',
             });
         }
         next();
@@ -637,12 +637,14 @@ booksRouter.patch(
         const ratingType = request.body.ratingType;
         if (!validationFunctions.isNumberProvided(ratingType)) {
             return response.status(400).send({
-                message: 'Rating type must be a number - please refer to documentation'
+                message:
+                    'Rating type must be a number - please refer to documentation',
             });
         }
         if (ratingType < 1 || ratingType > 5) {
             return response.status(400).send({
-                message: 'Rating type must be between 1-5 - please refer to documentation'
+                message:
+                    'Rating type must be between 1-5 - please refer to documentation',
             });
         }
         next();
@@ -652,12 +654,14 @@ booksRouter.patch(
         const value = request.body.value;
         if (!validationFunctions.isNumberProvided(value)) {
             return response.status(400).send({
-                message: 'Value must be a number - please refer to documentation'
+                message:
+                    'Value must be a number - please refer to documentation',
             });
         }
         if (!Number.isInteger(value) || value < 0) {
             return response.status(400).send({
-                message: 'Value must be a whole number (non-negative integer) - please refer to documentation'
+                message:
+                    'Value must be a whole number (non-negative integer) - please refer to documentation',
             });
         }
         next();
@@ -667,7 +671,8 @@ booksRouter.patch(
         const action = request.body.action || 'set'; // Default to 'set'
         if (!['set', 'increment', 'decrement'].includes(action)) {
             return response.status(400).send({
-                message: "Action must be either 'set', 'increment', or 'decrement' - please refer to documentation"
+                message:
+                    "Action must be either 'set', 'increment', or 'decrement' - please refer to documentation",
             });
         }
         next();
@@ -679,7 +684,7 @@ booksRouter.patch(
 
         try {
             const ratingColumn = `rating_${ratingType}_star`;
-            let operation : string;
+            let operation: string;
 
             switch (action) {
                 case 'increment':
@@ -692,7 +697,6 @@ booksRouter.patch(
                 default:
                     operation = `$1`;
                     break;
-
             }
 
             const updateQuery = `
@@ -710,19 +714,49 @@ booksRouter.patch(
                 });
             }
 
-
             const updatedBook = toBooks([result.rows[0]])[0];
             return response.status(200).send({
                 result: updatedBook,
             });
-
         } catch (error) {
             console.error('DB Query error on PATCH books/ratings', error);
             return response.status(500).send({
                 message: 'server error - contact support',
             });
         }
+    }
+);
 
+booksRouter.delete(
+    '/rangeOfBooks',
+    async (request: Request, response: Response) => {
+        if (
+            request.body.authors == null ||
+            request.body.authors == undefined ||
+            !validationFunctions.isStringProvided(request.body.authors)
+        ) {
+            return response.status(400).send({
+                message: 'Author not provided - please refer to documentation',
+            });
+        }
+        const theQuery = `DELETE FROM books WHERE authors = $1 RETURNING *`;
+        const values = [request.body.authors];
+        //const result = await pool.query(theQuery, values);
+        const { rows } = await pool.query(theQuery, values);
+
+        if (rows.length === 0) {
+            return response.status(404).send({
+                message: `No books found for author ${request.body.authors}`,
+            });
+        } else {
+            response.status(200).send({
+                message: `Books by author ${request.body.authors} deleted successfully`,
+                deletedBooks: rows.map((row) => toBooks(row)),
+            });
+        }
+
+        //const theQuery = `DELETE FROM books WHERE authors = $1`;
+        //const values = [givenAuthor];
     }
 );
 
