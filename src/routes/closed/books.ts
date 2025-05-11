@@ -727,6 +727,7 @@ booksRouter.patch(
     }
 );
 
+// DELETE BY AUTHOR
 booksRouter.delete(
     '/rangeOfBooks',
     async (request: Request, response: Response) => {
@@ -739,24 +740,32 @@ booksRouter.delete(
                 message: 'Author not provided - please refer to documentation',
             });
         }
-        const theQuery = `DELETE FROM books WHERE authors = $1 RETURNING *`;
-        const values = [request.body.authors];
-        //const result = await pool.query(theQuery, values);
-        const { rows } = await pool.query(theQuery, values);
+        try {
+            const theQuery = `DELETE
+                              FROM books
+                              WHERE authors = $1 RETURNING *`;
+            const values = [request.body.authors];
+            //const result = await pool.query(theQuery, values);
+            const { rows } = await pool.query(theQuery, values);
 
-        if (rows.length === 0) {
-            return response.status(404).send({
-                message: `No books found for author ${request.body.authors}`,
-            });
-        } else {
-            response.status(200).send({
-                message: `Books by author ${request.body.authors} deleted successfully`,
-                deletedBooks: rows.map((row) => toBooks(row)),
+            if (rows.length === 0) {
+                return response.status(404).send({
+                    message: `No books found for author ${request.body.authors}`,
+                });
+            } else {
+                response.status(200).send({
+                    message: `Books by author ${request.body.authors} deleted successfully`,
+                    deletedBooks: rows.map((row) => toBooks(row)),
+                });
+            }
+        } catch(error) {
+            console.error('DB Query error on DELETE books', error);
+            return response.status(500).send({
+                message: 'server error - contact support',
             });
         }
-
-        //const theQuery = `DELETE FROM books WHERE authors = $1`;
-        //const values = [givenAuthor];
+        // const theQuery = `DELETE FROM books WHERE authors = $1`;
+        // const values = [givenAuthor];
     }
 );
 
