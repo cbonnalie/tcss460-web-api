@@ -46,8 +46,6 @@ throughout the week when needed.
 
 ### Comments
 
-
-
 ## Beta Sprint II
 
 ### Contribution
@@ -62,6 +60,28 @@ throughout the week when needed.
     - Created route, documentation, and testing for updaing a book's rating(s).
 - Noah
     - Created route, documentation, and testing for pagination (both cursor and offset)
+
+### Meetings
+
+All meetings in the beta sprint were held remotely. Asynchronous communication was held
+throughout the week when needed.
+
+### Comments
+
+## Production Sprint
+
+### Contribution
+
+- Christian
+    - Finalized documentation and unit tests.
+    - Surprise database error troubleshooting.
+- Kaleb
+    - Created route, documentation, and testing for deleting a user.
+    - Surprise database error troubleshooting.
+- Mark
+    - Created route, documentation, and testing for deleting a book by isbn.
+- Noah
+    - Created route, documentation, and testing for deleting a range of books by author.
 
 ### Meetings
 
