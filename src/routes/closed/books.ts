@@ -19,7 +19,9 @@ const isStringProvided = validationFunctions.isStringProvided;
  */
 
 /**
- * @api {get} /books/ Request to retrieve books that contain the given query parameters
+ * @api {get} /books/ Retrieve books with query parameters
+ *
+ * @apiDescription Request to retrieve books from the database based on provided query parameters.
  *
  * @apiName GetBooks
  * @apiGroup Books
@@ -34,29 +36,39 @@ const isStringProvided = validationFunctions.isStringProvided;
  * @apiParam {string} [rating] The minimum rating of the book
  *
  * @apiSuccess {Object[]} books The array of book objects associated with the given query parameters
- * @apiSuccess {number} result.id The ID of the book
- * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} result.authors The authors of the book
- * @apiSuccess {string} result.publication The publication year of the book
- * @apiSuccess {string} result.original_title The original title of the book
- * @apiSuccess {string} result.title The title of the book
- * @apiSuccess {Object} result.ratings The ratings of the book
- * @apiSuccess {number} result.ratings.average The average rating of the book
- * @apiSuccess {number} result.ratings.count The number of ratings for the book
- * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
- * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
- * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
- * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
- * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
- * @apiSuccess {Object} result.images The book images
- * @apiSuccess {string} result.images.large URL of the large book image
- * @apiSuccess {string} result.images.small URL of the small book image
+ * @apiSuccess {number} books.id The ID of the book
+ * @apiSuccess {number} books.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} books.authors The authors of the book
+ * @apiSuccess {string} books.publication The publication year of the book
+ * @apiSuccess {string} books.original_title The original title of the book
+ * @apiSuccess {string} books.title The title of the book
+ * @apiSuccess {Object} books.ratings The ratings of the book
+ * @apiSuccess {number} books.ratings.average The average rating of the book
+ * @apiSuccess {number} books.ratings.count The number of ratings for the book
+ * @apiSuccess {number} books.ratings.rating_1 The number of 1-star ratings
+ * @apiSuccess {number} books.ratings.rating_2 The number of 2-star ratings
+ * @apiSuccess {number} books.ratings.rating_3 The number of 3-star ratings
+ * @apiSuccess {number} books.ratings.rating_4 The number of 4-star ratings
+ * @apiSuccess {number} books.ratings.rating_5 The number of 5-star ratings
+ * @apiSuccess {Object} books.images The book images
+ * @apiSuccess {string} books.images.large URL of the large book image
+ * @apiSuccess {string} books.images.small URL of the small book image
  *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid query parameter type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (400: Invalid query parameter value) {String} message "Query parameter value not of required type - please refer to documentation"
- * @apiError (404: No books found) {String} message "No books found for the given query"
- * @apiError (500: Server error) {String} message "server error - contact support"
+ * @apiError (400: No query parameter) {String} message
+ * "No query parameter in url - please refer to documentation"
+ * when a query parameter is not provided
+ * @apiError (400: Invalid query parameter type) {String} message
+ * "Query parameter not of required type - please refer to documentation"
+ * when a query parameter is not one of the valid choices
+ * @apiError (400: Invalid query parameter value) {String} message
+ * "Query parameter value not of required type - please refer to documentation"
+ * when a query parameter value is not of the required data type
+ * @apiError (404: No books found) {String} message
+ * "No books found for the given query"
+ * when the query returns zero books
+ * @apiError (500: Server error) {String} message
+ * "server error - contact support"
+ * when there is a database error
  */
 booksRouter.get(
     '/',
@@ -124,35 +136,202 @@ booksRouter.get(
 );
 
 /**
- * @api {post} /books/ Request to add a book
+ * @api {get} /books/offset Retrieve books with offset pagination
  *
- * @apiDescription Request to add a book to the DB.
+ * @apiDescription Request to retrieve books from the database with offset pagination using limit and offset query parameters.
+ *
+ * @apiName GetBooksWithOffsetPagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [offset=0] The offset to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination Metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total number of entries in the database
+ * @apiSuccess {number} pagination.limit The number of entries returned
+ * @apiSuccess {number} pagination.offset The offset used for retrieving entries
+ * @apiSuccess {number} pagination.nextPage The offset that should be used on a subsequent call
+ * @apiSuccess {Object[]} entries The book objects retrieved
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: Invalid parameter) {String} message "Query parameter not of required type - please refer to documentation"
+ * when a query parameter is not one of the valid choices
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
+ */
+
+/**
+ * async is used to declare an asynchronous function. It allows us to use the await keyword inside the function.
+ * The await keyword is used to wait for a promise to resolve or reject before continuing the execution of the code.
+ * It allows us to pause and wait for other asynchronous operations to complete before moving on to the next line of code.
+ * This is useful for handling asynchronous operations in a more readable and manageable way.
+ *
+ * async is useful for API calls and DB queries.
+ * Always want to return a promise.
+ */
+booksRouter.get('/offset', async (request: Request, response: Response) => {
+    // the + tells TS to treat this string as a number
+    // We cab always change the size of the limit and offset in the future
+    const limit =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const offset =
+        validationFunctions.isNumberProvided(request.query.offset) &&
+        +request.query.offset >= 0
+            ? +request.query.offset
+            : 0;
+
+    const theQuery = `SELECT * 
+                      FROM books 
+                      ORDER BY id 
+                      LIMIT $1 OFFSET $2`;
+    const values = [limit, offset];
+
+    // deconstructing the returned object. const {rows}
+    const { rows } = await pool.query(theQuery, values);
+
+    // slow on datasets (especially on large datasets)
+    /**
+     * await (promise syntax) is a keyword that is used to pause execution of an async
+     * function until a promise resolves or rejects. It can only be used inside an async function.
+     * Basically, it waits here until the result is returned.
+     */
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
+    response.send({
+        entries: rows.map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            offset,
+            nextPage: limit + offset,
+        },
+    });
+});
+
+/**
+ * @api {get} /books/cursor Retrieve books with cursor pagination
+ *
+ * @apiDescription Request to retrieve books from the database with cursor pagination using limit and cursor query parameters.
+ *
+ * @apiName GetBooksWithCursorPagination
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {number} [limit=10] The number of entries to return (default is 10)
+ * @apiParam {number} [cursor=0] The cursor to start retrieving entries from (default is 0)
+ *
+ * @apiSuccess {Object} pagination Metadata results from the paginated query
+ * @apiSuccess {number} pagination.totalRecords The total number of entries in the database
+ * @apiSuccess {number} pagination.limit The number of entries returned
+ * @apiSuccess {number} pagination.cursor The cursor that was used to offset the lookup of entries
+ * @apiSuccess {Object[]} entries The book objects retrieved
+ * @apiSuccess {number} entries.id The ID of the book
+ * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} entries.authors The authors of the book
+ * @apiSuccess {string} entries.publication_year The publication year of the book
+ * @apiSuccess {string} entries.original_title The original title of the book
+ * @apiSuccess {string} entries.title The title of the book
+ * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
+ * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
+ * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
+ * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
+ * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
+ * @apiSuccess {string} entries.image_url The URL of the book cover image
+ * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
+ *
+ * @apiError (400: Invalid parameter) {String} message "Query parameter not of required type - please refer to documentation"
+ * when a query parameter is not one of the valid choices
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
+ */
+booksRouter.get('/cursor', async (request: Request, response: Response) => {
+    const theQuery = `SELECT *
+                      FROM books
+                      WHERE id > $2
+                      ORDER BY id
+                      LIMIT $1`;
+
+    // defaults
+    const limit: number =
+        validationFunctions.isNumberProvided(request.query.limit) &&
+        +request.query.limit > 0
+            ? +request.query.limit
+            : 10;
+    const cursor: number =
+        validationFunctions.isNumberProvided(request.query.cursor) &&
+        +request.query.cursor >= 0
+            ? +request.query.cursor
+            : 0;
+
+    const values = [limit, cursor];
+    const { rows } = await pool.query(theQuery, values);
+    const result = await pool.query(`SELECT COUNT(*) FROM books`);
+    const count = result.rows[0].count;
+
+    response.send({
+        //entries: rows.map((row) => toBook(row)),
+        entries: rows
+            .map(({ book_id, ...rest }) => rest)
+            .map((row) => toBook(row)),
+        pagination: {
+            totalRecords: count,
+            limit,
+            cursor: rows
+                .map((row) => row.id)
+                .reduce((max, id) => (id > max ? id : max)),
+        },
+    });
+});
+
+/**
+ * @api {post} /books/ Add a book
+ *
+ * @apiDescription Request to add a new book to the database.
  *
  * @apiName AddBook
  * @apiGroup Books
  *
  * @apiUse JWT
  *
- * @apiSuccess {Object} result The book object
- * @apiSuccess {number} result.id The ID of the book
- * @apiSuccess {number} result.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} result.authors The authors of the book
- * @apiSuccess {string} result.publication The publication year of the book
- * @apiSuccess {string} result.original_title The original title of the book
- * @apiSuccess {string} result.title The title of the book
- * @apiSuccess {Object} result.ratings The ratings of the book
- * @apiSuccess {number} result.ratings.rating_1 The number of 1-star ratings
- * @apiSuccess {number} result.ratings.rating_2 The number of 2-star ratings
- * @apiSuccess {number} result.ratings.rating_3 The number of 3-star ratings
- * @apiSuccess {number} result.ratings.rating_4 The number of 4-star ratings
- * @apiSuccess {number} result.ratings.rating_5 The number of 5-star ratings
- * @apiSuccess {Object} result.icons The icons of the book
- * @apiSuccess {string} result.icons.large The URL of the large icon
- * @apiSuccess {string} result.icons.small The URL of the small icon
+ * @apiBody {number} isbn13 The ISBN-13 of the book
+ * @apiBody {string} authors The authors of the book
+ * @apiBody {number} publication_year The publication year of the book
+ * @apiBody {string} original_title The original title of the book
+ * @apiBody {string} title The title of the book
+ * @apiBody {number} rating_1_star The number of 1-star ratings
+ * @apiBody {number} rating_2_star The number of 2-star ratings
+ * @apiBody {number} rating_3_star The number of 3-star ratings
+ * @apiBody {number} rating_4_star The number of 4-star ratings
+ * @apiBody {number} rating_5_star The number of 5-star ratings
+ * @apiBody {string} image_url The URL of the book cover image
+ * @apiBody {string} small_image_url The URL of the small book cover image
  *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
+ * @apiSuccess {String} message Success message confirming the book was added
+ *
+ * @apiError (400: Missing parameter) {String} message "[Parameter] not provided - please refer to documentation"
+ * when a required parameter is not provided
+ * @apiError (400: Invalid parameter type) {String} message "[Parameter] must be a [type] - please refer to documentation"
+ * when a parameter is not of the required type
  * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
  */
 booksRouter.post(
     '/',
@@ -415,173 +594,9 @@ booksRouter.post(
 );
 
 /**
- * @api {get} /offset Request to retrieve books with offset pagination
- *
- * @apiDescription Request to retrieve books from the DB with offset pagination using limit and offset query parameters.
- *
- * @apiName GetAllBooksWithPagination
- * @apiGroup Books
- *
- * @apiUse JWT
- *
- * @apiParam {number} [limit=10] The number of entries to return (default is 10)
- * @apiParam {number} [offset=0] The offset to start retrieving entries from (default is 0)
- *
- * @apiSuccess {Object} pagination metadata results from the paginated query
- * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
- * @apiSuccess {number} pagination.limit The number of entry objects to returned.
- * @apiSuccess {number} pagination.offset The number used to offset the lookup of entry objects.
- * @apiSuccess {number} pagination.nextPage The offset that should be used on a preceding call to this route.
- * @apiSuccess {Object[]} entries The message entry objects of all entries
- * @apiSuccess {number} entries.id The ID of the book
- * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} entries.authors The authors of the book
- * @apiSuccess {string} entries.publication_year The publication year of the book
- * @apiSuccess {string} entries.original_title The original title of the book
- * @apiSuccess {string} entries.title The title of the book
- * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
- * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
- * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
- * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
- * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
- * @apiSuccess {string} entries.image_url The URL of the book cover image
- * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
- *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (500: Server error) {String} message "server error - contact support"
- */
-
-/**
- * async is used to declare an asynchronous function. It allows us to use the await keyword inside the function.
- * The await keyword is used to wait for a promise to resolve or reject before continuing the execution of the code.
- * It allows us to pause and wait for other asynchronous operations to complete before moving on to the next line of code.
- * This is useful for handling asynchronous operations in a more readable and manageable way.
- *
- * async is useful for API calls and DB queries.
- * Always want to return a promise.
- */
-booksRouter.get('/offset', async (request: Request, response: Response) => {
-    // the + tells TS to treat this string as a number
-    // We cab always change the size of the limit and offset in the future
-    const limit =
-        validationFunctions.isNumberProvided(request.query.limit) &&
-        +request.query.limit > 0
-            ? +request.query.limit
-            : 10;
-    const offset =
-        validationFunctions.isNumberProvided(request.query.offset) &&
-        +request.query.offset >= 0
-            ? +request.query.offset
-            : 0;
-
-    const theQuery = `SELECT * 
-                      FROM books 
-                      ORDER BY id 
-                      LIMIT $1 OFFSET $2`;
-    const values = [limit, offset];
-
-    // deconstructing the returned object. const {rows}
-    const { rows } = await pool.query(theQuery, values);
-
-    // slow on datasets (especially on large datasets)
-    /**
-     * await (promise syntax) is a keyword that is used to pause execution of an async
-     * function until a promise resolves or rejects. It can only be used inside an async function.
-     * Basically, it waits here until the result is returned.
-     */
-    const result = await pool.query(`SELECT COUNT(*) FROM books`);
-    const count = result.rows[0].count;
-    response.send({
-        entries: rows.map((row) => toBook(row)),
-        pagination: {
-            totalRecords: count,
-            limit,
-            offset,
-            nextPage: limit + offset,
-        },
-    });
-});
-
-/**
- * @api {get} /cursor Request to retrieve books with pagination
- *
- * @apiDescription Request to retrieve books from the DB with pagination using limit and cursor query parameters.
- *
- * @apiName GetAllBooksWithPagination
- * @apiGroup Books
- *
- * @apiUse JWT
- *
- * @apiParam {number} [limit=10] The number of entries to return (default is 10)
- * @apiParam {number} [cursor=0] The cursor to start retrieving entries from (default is 0)
- *
- * @apiSuccess {Object} pagination metadata results from the paginated query
- * @apiSuccess {number} pagination.totalRecords The total recent count on the total amount of entries. May be stale.
- * @apiSuccess {number} pagination.limit The number of entry objects to returned.
- * @apiSuccess {number} pagination.cursor The cursor that was used to offset the lookup of entry objects.
- * @apiSuccess {Object[]} entries The message entry objects of all entries
- * @apiSuccess {number} entries.id The ID of the book
- * @apiSuccess {number} entries.isbn13 The ISBN-13 of the book
- * @apiSuccess {string} entries.authors The authors of the book
- * @apiSuccess {string} entries.publication_year The publication year of the book
- * @apiSuccess {string} entries.original_title The original title of the book
- * @apiSuccess {string} entries.title The title of the book
- * @apiSuccess {number} entries.rating_1_star The number of 1-star ratings
- * @apiSuccess {number} entries.rating_2_star The number of 2-star ratings
- * @apiSuccess {number} entries.rating_3_star The number of 3-star ratings
- * @apiSuccess {number} entries.rating_4_star The number of 4-star ratings
- * @apiSuccess {number} entries.rating_5_star The number of 5-star ratings
- * @apiSuccess {string} entries.image_url The URL of the book cover image
- * @apiSuccess {string} entries.image_small_url The URL of the small book cover image
- *
- * @apiError (400: No query parameter) {String} message "No query parameter in url - please refer to documentation"
- * @apiError (400: Invalid type) {String} message "Query parameter not of required type - please refer to documentation"
- * @apiError (500: Server error) {String} message "server error - contact support"
- */
-booksRouter.get('/cursor', async (request: Request, response: Response) => {
-    const theQuery = `SELECT *
-                      FROM books
-                      WHERE id > $2
-                      ORDER BY id
-                      LIMIT $1`;
-
-    // defaults
-    const limit: number =
-        validationFunctions.isNumberProvided(request.query.limit) &&
-        +request.query.limit > 0
-            ? +request.query.limit
-            : 10;
-    const cursor: number =
-        validationFunctions.isNumberProvided(request.query.cursor) &&
-        +request.query.cursor >= 0
-            ? +request.query.cursor
-            : 0;
-
-    const values = [limit, cursor];
-    const { rows } = await pool.query(theQuery, values);
-    const result = await pool.query(`SELECT COUNT(*) FROM books`);
-    const count = result.rows[0].count;
-
-    response.send({
-        //entries: rows.map((row) => toBook(row)),
-        entries: rows
-            .map(({ book_id, ...rest }) => rest)
-            .map((row) => toBook(row)),
-        pagination: {
-            totalRecords: count,
-            limit,
-            cursor: rows
-                .map((row) => row.id)
-                .reduce((max, id) => (id > max ? id : max)),
-        },
-    });
-});
-
-/**
  * @api {patch} /books/ratings/:isbn Update a book's ratings
  *
- * @apiDescription Request to update rating counts for a specifc book identified by ISBN.
+ * @apiDescription Request to update rating counts for a specific book identified by ISBN.
  *
  * @apiName UpdateBookRatings
  * @apiGroup Books
@@ -589,10 +604,10 @@ booksRouter.get('/cursor', async (request: Request, response: Response) => {
  * @apiUse JWT
  *
  * @apiParam {string} isbn The ISBN-13 of the book to be updated
- * @apiParam {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
  *
  * @apiBody {number} ratingType The star rating to be updated (1-5)
  * @apiBody {number} value The value to set/add/subtract to the rating count (non-negative integer)
+ * @apiBody {string} [action="set"] The operation to perform: "set" (replace value) or "increment" (add to current value) or "decrement" (subtract from current value)
  *
  * @apiSuccess {Object} result The updated book object
  * @apiSuccess {number} result.id The ID of the book
@@ -609,16 +624,22 @@ booksRouter.get('/cursor', async (request: Request, response: Response) => {
  * @apiSuccess {number} result.ratings.rating_3 Updated 3-star count
  * @apiSuccess {number} result.ratings.rating_4 Updated 4-star count
  * @apiSuccess {number} result.ratings.rating_5 Updated 5-star count
- * @apiSuccess {Object} result.icons Cover URLs
- * @apiSuccess {string} result.icons.large Large cover image URL
- * @apiSuccess {string} result.icons.small Small cover image URL
+ * @apiSuccess {Object} result.images Cover URLs
+ * @apiSuccess {string} result.images.large Large cover image URL
+ * @apiSuccess {string} result.images.small Small cover image URL
  *
  * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
+ * when the ISBN is not a valid 13-digit number
  * @apiError (400: Invalid rating type) {String} message "Rating type must be between 1-5"
+ * when the rating type is not between 1 and 5
  * @apiError (400: Invalid value) {String} message "Value must be a non-negative integer"
- * @apiError (400: Invalid action) {String} message "Action must be either 'set', 'increment', or decrement'"
+ * when the value is not a non-negative integer
+ * @apiError (400: Invalid action) {String} message "Action must be either 'set', 'increment', or 'decrement'"
+ * when the action is not one of the valid options
  * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
+ * when the book with the given ISBN does not exist
  * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
  */
 booksRouter.patch(
     '/ratings/:isbn',
@@ -727,7 +748,45 @@ booksRouter.patch(
     }
 );
 
-// DELETE BY AUTHOR
+/**
+ * @api {delete} /books/rangeOfBooks Delete books by author
+ *
+ * @apiDescription Request to delete all books from the database that contain the given author.
+ *
+ * @apiName DeleteBooksByAuthor
+ * @apiGroup Books
+ *
+ * @apiUse JWT
+ *
+ * @apiParam {string} [authors] The author of the books to delete
+ *
+ * @apiSuccess {String} message Success message confirming deletion
+ * @apiSuccess {Object[]} deletedBooks The deleted book objects
+ * @apiSuccess {number} deletedBooks.id The ID of the book
+ * @apiSuccess {number} deletedBooks.isbn13 The ISBN-13 of the book
+ * @apiSuccess {string} deletedBooks.authors The authors of the book
+ * @apiSuccess {string} deletedBooks.publication The publication year of the book
+ * @apiSuccess {string} deletedBooks.original_title The original title of the book
+ * @apiSuccess {string} deletedBooks.title The title of the book
+ * @apiSuccess {Object} deletedBooks.ratings The ratings of the book
+ * @apiSuccess {number} deletedBooks.ratings.average The average rating
+ * @apiSuccess {number} deletedBooks.ratings.count Total rating count
+ * @apiSuccess {number} deletedBooks.ratings.rating_1 1-star ratings
+ * @apiSuccess {number} deletedBooks.ratings.rating_2 2-star ratings
+ * @apiSuccess {number} deletedBooks.ratings.rating_3 3-star ratings
+ * @apiSuccess {number} deletedBooks.ratings.rating_4 4-star ratings
+ * @apiSuccess {number} deletedBooks.ratings.rating_5 5-star ratings
+ * @apiSuccess {Object} deletedBooks.images The book images
+ * @apiSuccess {string} deletedBooks.images.large URL of large image
+ * @apiSuccess {string} deletedBooks.images.small URL of small image
+ *
+ * @apiError (400: No author provided) {String} message "Author not provided - please refer to documentation"
+ * when the author is not provided
+ * @apiError (404: No books found) {String} message "No books found for author [author]"
+ * when no books are found for the given author
+ * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
+ */
 booksRouter.delete(
     '/rangeOfBooks',
     async (request: Request, response: Response) => {
@@ -746,7 +805,6 @@ booksRouter.delete(
                               FROM books
                               WHERE authors ILIKE $1 RETURNING *`;
             const values = [request.body.authors];
-            //const result = await pool.query(theQuery, values);
             const { rows } = await pool.query(theQuery, values);
 
             if (rows.length === 0) {
@@ -765,8 +823,6 @@ booksRouter.delete(
                 message: 'server error - contact support',
             });
         }
-        // const theQuery = `DELETE FROM books WHERE authors = $1`;
-        // const values = [givenAuthor];
     }
 );
 
@@ -803,8 +859,11 @@ booksRouter.delete(
  * @apiSuccess {string} deletedBook.images.small URL of small image
  *
  * @apiError (400: Invalid ISBN) {String} message "Invalid ISBN format - must be 13 digits"
+ * when the ISBN is not a valid 13-digit number
  * @apiError (404: Book not found) {String} message "Book not found for ISBN [isbn]"
+ * when the book with the given ISBN does not exist
  * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a database error
  */
 booksRouter.delete(
     '/:isbn',

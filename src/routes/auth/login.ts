@@ -30,7 +30,7 @@ const key = {
 /**
  * @api {post} /login Request to sign a user in the system
  * @apiName PostLogin
- * @apiGroup Auth
+ * @apiGroup User
  *
  * @apiBody {String} email a users email
  * @apiBody {String} password a users password

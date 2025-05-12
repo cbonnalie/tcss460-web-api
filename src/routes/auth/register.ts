@@ -64,11 +64,11 @@ const emailMiddlewareCheck = (
 /**
  * @api {post} /register Request to register a user
  *
- * @apiDescription Document this route. !**Document the password rules here**!
- * !**Document the role rules here**!
+ * @apiDescription Request to register a user with a unique email & username. Password must be greater than 7 characters.
+ * Role must be a number between 1 and 5.
  *
  * @apiName PostRegister
- * @apiGroup Auth
+ * @apiGroup User
  *
  * @apiBody {String} firstname a users first name
  * @apiBody {String} lastname a users last name

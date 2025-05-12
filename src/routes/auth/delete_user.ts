@@ -24,15 +24,22 @@ const deleteUserRouter: Router = express.Router();
 /**
  * @api {patch} /deleteAccount Request to delete user
  *
- * @apiDescription Request to delete the currently signed in user.
+ * @apiDescription Request to delete the currently signed-in user.
  *
  * @apiName DeleteAccount
- * @apiGroup Auth
+ * @apiGroup User
  *
  * @apiUse JWT
  *
  * @apiSuccess {String} message "User account deleted successfully."
- * @apiSuccess {account} Account Account Details
+ * @apiSuccess {account} Details of the deleted account.
+ * @apiSuccess {number} account.account_id The id of the deleted account.
+ * @apiSuccess {string} account.firstname The first name of the deleted account.
+ * @apiSuccess {string} account.lastname The last name of the deleted account.
+ * @apiSuccess {string} account.username The username of the deleted account.
+ * @apiSuccess {string} account.email The email of the deleted account.
+ * @apiSuccess {string} account.phone The phone number of the deleted account.
+ * @apiSuccess {number} account.role The role of the deleted account.
  *
  * @apiError (403: Forbidden) {String} message "Token is not valid"
  * @apiError (401: Unauthorized) {String} message "Auth token is not supplied"

@@ -32,10 +32,10 @@ const changePassRouter: Router = express.Router();
 /**
  * @api {patch} /changePassword Request to change user's password
  *
- * @apiDescription Request to change the currently signed in user's password.
+ * @apiDescription Request to change the currently signed-in user's password.
  *
  * @apiName PatchPassword
- * @apiGroup Auth
+ * @apiGroup User
  *
  * @apiUse JWT
  *
@@ -45,11 +45,17 @@ const changePassRouter: Router = express.Router();
  * @apiSuccess {String} message "Password changed successfully"
  *
  * @apiError (403: Forbidden) {String} message "Token is not valid"
+ * when the provided Auth token is invalid for any reason.
  * @apiError (401: Unauthorized) {String} message "Auth token is not supplied"
+ * when no Auth token is provided
  * @apiError (400: Invalid type) {String} message "Request body values are not of required type"
+ * when the request body values are not of the required type
  * @apiError (400: Invalid length) {String} message "Password needs to be 7 or more characters"
+ * when the new password is less than 7 characters
  * @apiError (400: Invalid Credentials) {String} message "The supplied account id from the JWT does not exist or the supplied password does not match"
+ * when the supplied account id from the JWT does not exist or the supplied password does not match
  * @apiError (500: Server error) {String} message "server error - contact support"
+ * when there is a server error
  */
 changePassRouter.patch(
     '/changePassword',
