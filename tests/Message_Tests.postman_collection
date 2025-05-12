@@ -1,0 +1,333 @@
+{
+	"info": {
+		"_postman_id": "64ec7918-93ef-4fec-b7ca-f4d10802e3f4",
+		"name": "Message Tests",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38541945",
+		"_collection_link": "https://tcss460-group-9.postman.co/workspace/Messages~2e6ff5c7-e4ec-43f4-a3fc-0a182c39f97e/collection/38541945-64ec7918-93ef-4fec-b7ca-f4d10802e3f4?action=share&source=collection_link&creator=38541945"
+	},
+	"item": [
+		{
+			"name": "GET",
+			"item": [
+				{
+					"name": "GET By Name",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const body = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", () => \r",
+									"    pm.response.to.have.status(200)\r",
+									");\r",
+									"\r",
+									"pm.test(\"Response body should have entry field\", () => {\r",
+									"    pm.expect(response).to.haveOwnProperty(\"entry\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Entry Parts should equal body parts\", () => {\r",
+									"    const entry = response.entry;\r",
+									"    pm.expect(entry.name).to.equal(body.name);\r",
+									"    pm.expect(entry.message).to.equal(body.message);\r",
+									"    pm.expect(entry.priority).to.equal(body.priority);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/message/{{name}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message",
+								"{{name}}"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "GET By Priority",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const body = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", () => \r",
+									"    pm.response.to.have.status(200)\r",
+									");\r",
+									"\r",
+									"pm.test(\"Response body should have entry field\", () => {\r",
+									"    pm.expect(response).to.haveOwnProperty(\"entries\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body should have recently created message\", () => {\r",
+									"    const lastEntry = response.entries.filter(({name}) => name == body.name);\r",
+									"    pm.expect(lastEntry.length).to.equal(1);\r",
+									"    const entry = lastEntry[0];\r",
+									"    pm.expect(entry.name).to.equal(body.name);\r",
+									"    pm.expect(entry.message).to.equal(body.message);\r",
+									"    pm.expect(entry.priority).to.equal(body.priority);\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/message/?priority={{priority}}",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message",
+								""
+							],
+							"query": [
+								{
+									"key": "priority",
+									"value": "{{priority}}"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "View All Messages",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/message/all",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message",
+								"all"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "POST",
+			"item": [
+				{
+					"name": "Create New Message",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const {getRandomPriority} = pm.require('@tcss460-group-9/utils')\r",
+									"\r",
+									"const name = pm.collectionVariables.replaceIn('{{$randomFirstName}}') \r",
+									"+ \" \" \r",
+									"+ pm.collectionVariables.replaceIn('{{$randomLastName}}');\r",
+									"pm.collectionVariables.set('name', name);\r",
+									"\r",
+									"const message = pm.variables.replaceIn('{{$randomPhrase}}');\r",
+									"pm.collectionVariables.set('message', message);\r",
+									"\r",
+									"const priority = getRandomPriority();\r",
+									"pm.collectionVariables.set('priority', priority);\r",
+									"\r",
+									"pm.collectionVariables.set('body', JSON.stringify({name, message, priority}));"
+								],
+								"type": "text/javascript",
+								"packages": {
+									"@tcss460-group-9/utils": {
+										"id": "01965f7a-bf58-72ef-b09d-8897e0ceacd9"
+									}
+								}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { name, message, priority } = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+									"\r",
+									"const responseBody = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 201\", () => \r",
+									"    pm.response.to.have.status(201)\r",
+									");\r",
+									"\r",
+									"pm.test(\"Response body should have entry field\", () => {\r",
+									"    pm.expect(responseBody).to.haveOwnProperty(\"entry\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body should have form {priority} - [name] says: message\", () => \r",
+									"    pm.expect(responseBody.entry).to.equal(\"{\" + priority + \"} - [\" + name + \"] says: \" + message)\r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Create New Message 400 Same Name",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { name, message, priority } = JSON.parse(pm.variables.replaceIn('{{body}}'));\r",
+									"\r",
+									"const responseBody = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 400\", () => \r",
+									"    pm.response.to.have.status(400)\r",
+									");\r",
+									"\r",
+									"pm.test(\"Response body should have message field\", () => {\r",
+									"    pm.expect(responseBody).to.haveOwnProperty(\"message\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response body should have Name exists\", () => \r",
+									"    pm.expect(responseBody.message).to.equal(\"Name exists\")\r",
+									");"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/message",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELETE",
+			"item": [
+				{
+					"name": "Delete By Name",
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/message/Christian",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"message",
+								"Christian"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"variable": [
+		{
+			"key": "name",
+			"value": ""
+		},
+		{
+			"key": "message",
+			"value": ""
+		},
+		{
+			"key": "priority",
+			"value": ""
+		},
+		{
+			"key": "body",
+			"value": ""
+		}
+	]
+}

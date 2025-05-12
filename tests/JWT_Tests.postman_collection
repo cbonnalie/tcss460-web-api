@@ -1,0 +1,82 @@
+{
+	"info": {
+		"_postman_id": "2a781f87-1b2f-4c15-8561-086f081af368",
+		"name": "JWT",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38541945",
+		"_collection_link": "https://tcss460-group-9.postman.co/workspace/Messages~2e6ff5c7-e4ec-43f4-a3fc-0a182c39f97e/collection/38541945-2a781f87-1b2f-4c15-8561-086f081af368?action=share&source=collection_link&creator=38541945"
+	},
+	"item": [
+		{
+			"name": "Token Test",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"auth": {
+					"type": "bearer",
+					"bearer": [
+						{
+							"key": "token",
+							"value": "",
+							"type": "string"
+						}
+					]
+				},
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{BASE_URL}}/jwt_test",
+					"host": [
+						"{{BASE_URL}}"
+					],
+					"path": [
+						"jwt_test"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "bearer"
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "JSON_WEB_TOKEN",
+			"value": "MY@SECRET$key&fjaf8329Lets*make!32",
+			"type": "string"
+		}
+	]
+}

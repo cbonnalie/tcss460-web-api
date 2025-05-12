@@ -1,0 +1,813 @@
+{
+	"info": {
+		"_postman_id": "a7abf237-d406-4b1d-b3e7-a783ebb410f9",
+		"name": "User",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "38541945",
+		"_collection_link": "https://tcss460-group-9.postman.co/workspace/Messages~2e6ff5c7-e4ec-43f4-a3fc-0a182c39f97e/collection/38541945-a7abf237-d406-4b1d-b3e7-a783ebb410f9?action=share&source=collection_link&creator=38541945"
+	},
+	"item": [
+		{
+			"name": "POST",
+			"item": [
+				{
+					"name": "Register Random User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									"const firstname = pm.collectionVariables.replaceIn('{{$randomFirstName}}'); \r",
+									"const lastname = pm.collectionVariables.replaceIn('{{$randomLastName}}');\r",
+									"const email = pm.collectionVariables.replaceIn('{{$randomEmail}}');\r",
+									"const password = pm.collectionVariables.replaceIn('{{$randomPassword}}');\r",
+									"const username = pm.collectionVariables.replaceIn('{{$randomUserName}}');\r",
+									"const phone = pm.collectionVariables.replaceIn('{{$randomPhoneNumber}}');\r",
+									"const role = 1;\r",
+									"\r",
+									"pm.collectionVariables.set('body', JSON.stringify({\r",
+									"    firstname,\r",
+									"    lastname,\r",
+									"    username,\r",
+									"    password,\r",
+									"    email,\r",
+									"    phone,\r",
+									"    role\r",
+									"}));\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const requestBody = pm.request.body.raw ? JSON.parse(pm.request.body.raw) : {};\r",
+									"\r",
+									"pm.collectionVariables.set(\"email\", requestBody.email);\r",
+									"pm.collectionVariables.set(\"password\", requestBody.password);\r",
+									"\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{{body}}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/register",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Random User",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"pm.environment.set(\"ACCESS_TOKEN\", pm.response.json().accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"{{email}}\",\r\n    \"password\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "PATCH",
+			"item": [
+				{
+					"name": "Change Password 200 Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"{{oldPassword}}\",\r",
+									"    newPassword: \"{{newPassword}}\"\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", ()=>{\r",
+									"    pm.response.to.have.status(200)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message')\r",
+									"    pm.expect(response.message).to.equal(\"Password changed successfully\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"packages": {},
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"{{password}}\",\r\n    \"newPassword\": \"myNewPassword\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password 400 Invalid Type",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"{{oldPassword}}\",\r",
+									"    newPassword: true\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 400\", ()=>{\r",
+									"    pm.response.to.have.status(400)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message');\r",
+									"    pm.expect(response.message).to.equal(\"Request body values are not of required type\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"{{password}}\",\r\n    \"newPassword\": true\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password 400 Invalid Length",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"{{oldPassword}}\",\r",
+									"    newPassword: \"passw\"\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 400\", ()=>{\r",
+									"    pm.response.to.have.status(400)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message');\r",
+									"    pm.expect(response.message).to.equal(\"Password needs to be 7 or more characters\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"{{password}}\",\r\n    \"newPassword\": \"pass\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password 400 Invalid Credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"pass\",\r",
+									"    newPassword: \"{{newPassword}}\"\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 400\", ()=>{\r",
+									"    pm.response.to.have.status(400)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message');\r",
+									"    pm.expect(response.message).to.equal(\"The supplied account id from the JWT does not exist or the supplied password does not match\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldPassword\": \"pass\",\r\n    \"newPassword\": \"{{password}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password 401 No Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"{{oldPassword}}\",\r",
+									"    newPassword: \"{{newPassword}}\"\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 401\", ()=>{\r",
+									"    pm.response.to.have.status(401)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message');\r",
+									"    pm.expect(response.message).to.equal(\"Auth token is not supplied\");\r",
+									"});  "
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "noauth"
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldpassword\": \"{{oldPassword}}\",\r\n    \"newpassword\": \"{{newPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Change Password 403 Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const { oldPassword, newPassword } = {\r",
+									"    oldPassword: \"{{oldPassword}}\",\r",
+									"    newPassword: \"{{newPassword}}\"\r",
+									"};\r",
+									"\r",
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 403\", ()=>{\r",
+									"    pm.response.to.have.status(403)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message');\r",
+									"    pm.expect(response.message).to.equal(\"Token is not valid\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJuYW1lIjoiVGVzdCIsInJvbGUiOjEsImlkIjo5LCJpYXQiOjE3NDY0MDM1NDQsImV4cCI6MTc0NzYxMzE0NH0.Risxp5-lIELaSV_vHMGpQwCLBl7jK20455u30ZnTV2Yq34hufq34fhqoruiegw",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PATCH",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"oldpassword\": \"{{oldPassword}}\",\r\n    \"newpassword\": \"{{newPassword}}\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{base_url}}/changePassword",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"changePassword"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "DELETE",
+			"item": [
+				{
+					"name": "Create Test User",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"firstname\": \"Test\",\r\n    \"lastname\": \"User\",\r\n    \"email\": \"example@example.com\",\r\n    \"password\": \"password123\",\r\n    \"username\": \"TestUser\",\r\n    \"role\": \"1\",\r\n    \"phone\": \"1234567890\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/register",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Test Login",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"exec": [
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let response = pm.response.json();\r",
+									"pm.collectionVariables.set(\"testuserJWT\", response.accessToken);"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\r\n    \"email\": \"example@example.com\",\r\n    \"password\": \"password123\"\r\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASE_URL}}/login",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 403 Invalid Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", ()=>{\r",
+									"    pm.response.to.have.status(403)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message')\r",
+									"    pm.expect(response.message).to.equal(\"Token is not valid\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{testuserJWT}}+1",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/deleteAccount",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"deleteAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 401 No Token",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", ()=>{\r",
+									"    pm.response.to.have.status(401)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message')\r",
+									"    pm.expect(response.message).to.equal(\"Auth token is not supplied\");\r",
+									"});\r",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/deleteAccount",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"deleteAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 200 Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", ()=>{\r",
+									"    pm.response.to.have.status(200)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message')\r",
+									"    pm.expect(response.message).to.equal(\"User account deleted successfully.\");\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have account field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('account')\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{testuserJWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/deleteAccount",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"deleteAccount"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete User 400 Invalid ID",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"const response = pm.response.json();\r",
+									"\r",
+									"pm.test(\"Response status should be 200\", ()=>{\r",
+									"    pm.response.to.have.status(400)\r",
+									"});\r",
+									"\r",
+									"pm.test(\"Response should have message field\", ()=>{\r",
+									"    pm.expect(response).to.haveOwnProperty('message')\r",
+									"    pm.expect(response.message).to.equal(\"The supplied account id from the JWT does not exist\");\r",
+									"});"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{testuserJWT}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{BASE_URL}}/deleteAccount",
+							"host": [
+								"{{BASE_URL}}"
+							],
+							"path": [
+								"deleteAccount"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [
+			{
+				"key": "token",
+				"value": "{{ACCESS_TOKEN}}",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "body",
+			"value": ""
+		},
+		{
+			"key": "email",
+			"value": ""
+		},
+		{
+			"key": "password",
+			"value": ""
+		},
+		{
+			"key": "testuserJWT",
+			"value": ""
+		}
+	]
+}
