@@ -85,7 +85,7 @@ throughout the week when needed.
 
 ### Meetings
 
-All meetings in the beta sprint were held remotely. Asynchronous communication was held
+All meetings in the production sprint were held remotely. Asynchronous communication was held
 throughout the week when needed.
 
 ### Comments
