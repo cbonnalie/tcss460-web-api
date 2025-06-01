@@ -21,7 +21,7 @@ const isStringProvided = validationFunctions.isStringProvided;
 /**
  * @api {get} /books/ Retrieve books with query parameters
  *
- * @apiDescription Request to retrieve books from the database based on provided query parameters.
+ * @apiDescription Request to retrieve books from the database based on provided query parameters. At least one query parameter must be provided.
  *
  * @apiName GetBooks
  * @apiGroup Books
