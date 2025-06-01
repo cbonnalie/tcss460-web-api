@@ -7,17 +7,17 @@
 /**
  * Inserted into a SQL query to calculate the average rating of a book.
  */
-const avgRatingQuery = `(
-(rating_1_star * 1) + 
-(rating_2_star * 2) + 
-(rating_3_star * 3) + 
-(rating_4_star * 4) + 
-(rating_5_star * 5)) / (
-rating_1_star + 
-rating_2_star + 
-rating_3_star + 
-rating_4_star + 
-rating_5_star)`;
+const avgRatingQuery = `CAST(
+        ((rating_1_star * 1) +
+        (rating_2_star * 2) +
+        (rating_3_star * 3) +
+        (rating_4_star * 4) +
+        (rating_5_star * 5)) AS DECIMAL(10,2)) / 
+    CAST((rating_1_star +
+        rating_2_star +
+        rating_3_star +
+        rating_4_star +
+        rating_5_star) AS DECIMAL(10,2))`;
 
 function buildBooksQuery(queryParams: any) {
     const keys = Object.keys(queryParams);
