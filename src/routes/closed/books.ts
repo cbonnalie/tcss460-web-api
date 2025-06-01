@@ -78,11 +78,14 @@ booksRouter.get(
             // do we have a query parameter?
             const query = request.query;
             const queryLength = Object.keys(query).length;
+
             if (queryLength === 0) {
-                return response.status(400).send({
-                    message:
-                        'No query parameter in url - please refer to documentation',
-                });
+                // return response.status(400).send({
+                //     message:
+                //         'No query parameter in url - please refer to documentation',
+                // });
+
+                return next();
             }
 
             // check that each query parameter is valid
@@ -112,7 +115,23 @@ booksRouter.get(
     },
     async (request: Request, response: Response) => {
         const query = request.query;
-        const { queryString, values } = buildBooksQuery(query);
+        const queryLength = Object.keys(query).length;
+
+        // const { queryString, values } = buildBooksQuery(query);
+
+        let queryString: string;
+        let values: any[];
+
+        if (queryLength === 0) {
+            // no query parameters, return all books
+            queryString = 'SELECT * FROM books ORDER BY id';
+            values = [];
+        } else {
+            // build the query string and values based on the query parameters
+            const queryResult = buildBooksQuery(query);
+            queryString = queryResult.queryString;
+            values = queryResult.values;
+        }
 
         await pool
             .query(queryString, values)
