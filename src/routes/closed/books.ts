@@ -448,6 +448,7 @@ booksRouter.post(
             request.body.rating_1_star === undefined
         ) {
             request.body.rating_1_star = 0;
+            next();
         } else if (!isNumberProvided(request.body.rating_1_star)) {
             response.status(400).send({
                 message:
@@ -464,6 +465,7 @@ booksRouter.post(
             request.body.rating_2_star === undefined
         ) {
             request.body.rating_2_star = 0;
+            next();
         } else if (!isNumberProvided(request.body.rating_2_star)) {
             response.status(400).send({
                 message:
@@ -480,6 +482,7 @@ booksRouter.post(
             request.body.rating_3_star === undefined
         ) {
             request.body.rating_3_star = 0;
+            next();
         } else if (!isNumberProvided(request.body.rating_3_star)) {
             response.status(400).send({
                 message:
@@ -496,6 +499,7 @@ booksRouter.post(
             request.body.rating_4_star === undefined
         ) {
             request.body.rating_4_star = 0;
+            next();
         } else if (!isNumberProvided(request.body.rating_4_star)) {
             response.status(400).send({
                 message:
@@ -512,6 +516,7 @@ booksRouter.post(
             request.body.rating_5_star === undefined
         ) {
             request.body.rating_5_star = 0;
+            next();
         } else if (!isNumberProvided(request.body.rating_5_star)) {
             response.status(400).send({
                 message:
