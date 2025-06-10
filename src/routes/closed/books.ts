@@ -447,10 +447,7 @@ booksRouter.post(
             request.body.rating_1_star === null ||
             request.body.rating_1_star === undefined
         ) {
-            response.status(400).send({
-                message:
-                    'Ratings 1 not provided - please refer to documentation',
-            });
+            request.body.rating_1_star = 0;
         } else if (!isNumberProvided(request.body.rating_1_star)) {
             response.status(400).send({
                 message:
@@ -466,10 +463,7 @@ booksRouter.post(
             request.body.rating_2_star === null ||
             request.body.rating_2_star === undefined
         ) {
-            response.status(400).send({
-                message:
-                    'Ratings 2 not provided - please refer to documentation',
-            });
+            request.body.rating_2_star = 0;
         } else if (!isNumberProvided(request.body.rating_2_star)) {
             response.status(400).send({
                 message:
@@ -485,10 +479,7 @@ booksRouter.post(
             request.body.rating_3_star === null ||
             request.body.rating_3_star === undefined
         ) {
-            response.status(400).send({
-                message:
-                    'Ratings 3 not provided - please refer to documentation',
-            });
+            request.body.rating_3_star = 0;
         } else if (!isNumberProvided(request.body.rating_3_star)) {
             response.status(400).send({
                 message:
@@ -504,10 +495,7 @@ booksRouter.post(
             request.body.rating_4_star === null ||
             request.body.rating_4_star === undefined
         ) {
-            response.status(400).send({
-                message:
-                    'Ratings 4 not provided - please refer to documentation',
-            });
+            request.body.rating_4_star = 0;
         } else if (!isNumberProvided(request.body.rating_4_star)) {
             response.status(400).send({
                 message:
@@ -523,10 +511,7 @@ booksRouter.post(
             request.body.rating_5_star === null ||
             request.body.rating_5_star === undefined
         ) {
-            response.status(400).send({
-                message:
-                    'Ratings 5 not provided - please refer to documentation',
-            });
+            request.body.rating_5_star = 0;
         } else if (!isNumberProvided(request.body.rating_5_star)) {
             response.status(400).send({
                 message:
