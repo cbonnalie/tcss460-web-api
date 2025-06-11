@@ -9,7 +9,7 @@
  */
 const avgRatingQuery = `CASE 
     WHEN (rating_1_star + rating_2_star + rating_3_star + rating_4_star + rating_5_star) = 0 
-    THEN NULL 
+    THEN 0 
     ELSE 
         CAST(
             ((rating_1_star * 1) +
